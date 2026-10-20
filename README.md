@@ -55,13 +55,27 @@ Anyone can sign up at `/signup` as a farmer or investor. Change the admin passwo
 - Filtered/paginated search URLs are `noindex, follow` to avoid duplicate content; dashboards/admin are `noindex`
 - After deploying: set `NEXT_PUBLIC_SITE_URL` to your real domain, add the site in **Google Search Console**, put the verification code in `GOOGLE_SITE_VERIFICATION`, and submit `https://your-domain/sitemap.xml`.
 
-## Deploying
-Data is stored in files, so deploy to a host with a **persistent disk** (VPS, Railway, Render with a disk, DigitalOcean, etc.):
+## Deploying on Vercel
+Vercel cannot save files, so connect its free storage (one time, ~2 minutes):
+
+1. Vercel dashboard → your project → **Storage** → **Create Database** → **Neon (Postgres)** → Connect to the project.
+   This adds `DATABASE_URL` automatically. The tables and demo data (incl. the admin account) are created on first visit.
+2. **Storage** → **Create** → **Blob** → Connect to the project. This adds `BLOB_READ_WRITE_TOKEN` (needed for photo/document uploads).
+3. **Settings → Environment Variables**, add:
+   - `AUTH_SECRET` = any long random text (keeps logins secure)
+   - `NEXT_PUBLIC_SITE_URL` = `https://your-domain` (optional, defaults to the Vercel domain)
+   - `ADMIN_EMAIL` / `ADMIN_PASSWORD` (optional, default pushkargharate3011@gmail.com / pushkar3011)
+4. **Deployments** → ⋯ → **Redeploy**.
+
+Without step 1 the site still opens, but changes are only kept temporarily.
+Any Postgres works (e.g. Supabase): just set `DATABASE_URL` to its connection string.
+
+## Deploying on a VPS
+Without `DATABASE_URL` data is stored in `./data` (JSON + uploads):
 ```bash
 npm run build && npm start   # set PORT if needed
 ```
-Set `AUTH_SECRET` to a long random string in production. `DATA_DIR` lets you point the database/uploads at a mounted volume.
-Serverless hosts like Vercel do **not** keep written files, so listings added there would be lost – for Vercel, move `src/lib/db.ts` to a real database (e.g. Supabase/Postgres) first.
+Set `AUTH_SECRET` in production. `DATA_DIR` lets you point the data folder at a mounted volume.
 
 ## Project structure
 ```

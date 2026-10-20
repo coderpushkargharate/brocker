@@ -15,7 +15,7 @@ const STATUSES: LandStatus[] = ["active", "pending", "draft", "rejected", "sold"
 
 export default async function AdminLands({ searchParams }: { searchParams: Promise<{ q?: string; status?: string; sort?: string; saved?: string }> }) {
   const { q = "", status = "", sort = "", saved } = await searchParams;
-  const db = readDB();
+  const db = (await readDB());
   let lands = [...db.lands];
   if (status) lands = lands.filter((l) => l.status === status);
   if (q) {

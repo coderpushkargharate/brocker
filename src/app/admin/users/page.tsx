@@ -14,7 +14,7 @@ export const metadata = { title: "Users" };
 export default async function AdminUsers({ searchParams }: { searchParams: Promise<{ role?: string; q?: string }> }) {
   const { role = "", q = "" } = await searchParams;
   const me = await getCurrentUser();
-  const db = readDB();
+  const db = (await readDB());
   let users = [...db.users].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
   if (role) users = users.filter((u) => u.role === role);
   if (q) users = users.filter((u) => `${u.name} ${u.email} ${u.phone}`.toLowerCase().includes(q.toLowerCase()));

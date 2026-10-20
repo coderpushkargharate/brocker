@@ -5,20 +5,20 @@ import { BUDGETS, AREAS } from "./config";
 
 export const PAGE_SIZE = 6;
 
-export function publicLands(db: DB = readDB()) {
+export function publicLands(db: DB) {
   return db.lands.filter((l) => l.status === "active");
 }
 
-export function getLandBySlug(slug: string) {
-  return readDB().lands.find((l) => l.slug === slug);
+export async function getLandBySlug(slug: string) {
+  return (await (await readDB())).lands.find((l) => l.slug === slug);
 }
 
-export function getLandById(id: string) {
-  return readDB().lands.find((l) => l.id === id);
+export async function getLandById(id: string) {
+  return (await (await readDB())).lands.find((l) => l.id === id);
 }
 
-export function getUser(id: string): PublicUser | undefined {
-  const u = readDB().users.find((x) => x.id === id);
+export async function getUser(id: string): Promise<PublicUser | undefined> {
+  const u = (await (await readDB())).users.find((x) => x.id === id);
   return u ? toPublic(u) : undefined;
 }
 
@@ -45,8 +45,8 @@ export function parseRange(v?: string): [number, number] | null {
   return [a, b];
 }
 
-export function searchLands(q: LandQuery) {
-  let list = publicLands();
+export function searchLands(q: LandQuery, db: DB) {
+  let list = publicLands(db);
   if (q.district) list = list.filter((l) => l.district.toLowerCase() === q.district!.toLowerCase());
   if (q.taluka) list = list.filter((l) => l.taluka.toLowerCase() === q.taluka!.toLowerCase());
   if (q.type) list = list.filter((l) => l.landType.toLowerCase() === q.type!.toLowerCase());
@@ -135,14 +135,14 @@ export function profileStrength(u: PublicUser | User) {
   return Math.round((all.filter(Boolean).length / all.length) * 100);
 }
 
-export function districtCounts() {
+export function districtCounts(db: DB) {
   const m = new Map<string, number>();
-  for (const l of publicLands()) m.set(l.district, (m.get(l.district) || 0) + 1);
+  for (const l of publicLands(db)) m.set(l.district, (m.get(l.district) || 0) + 1);
   return m;
 }
 
-export function similarLands(l: Land, n = 4) {
-  return publicLands()
+export function similarLands(l: Land, n: number, db: DB) {
+  return publicLands(db)
     .filter((x) => x.id !== l.id)
     .sort((a, b) => Number(b.district === l.district) - Number(a.district === l.district) || Math.abs(a.price - l.price) - Math.abs(b.price - l.price))
     .slice(0, n);

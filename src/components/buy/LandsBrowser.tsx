@@ -15,8 +15,8 @@ import { site } from "@/lib/config";
 
 export async function LandsBrowser({ q, basePath, title, subtitle }: { q: LandQuery; basePath: string; title: string; subtitle: string }) {
   const user = await getCurrentUser();
-  const { items, total, page, pages } = searchLands(q);
-  const db = readDB();
+  const { items, total, page, pages } = searchLands(q, await readDB());
+  const db = (await readDB());
   const saved = new Set(user?.saved ?? []);
   const interested = new Set(user ? db.interests.filter((i) => i.investorId === user.id).map((i) => i.landId) : []);
   const qs = q as Record<string, string | undefined>;

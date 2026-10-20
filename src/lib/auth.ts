@@ -30,7 +30,7 @@ export async function getCurrentUser(): Promise<PublicUser | null> {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   const s = await verifySession(token);
   if (!s) return null;
-  const u = readDB().users.find((x) => x.id === s.sub);
+  const u = (await readDB()).users.find((x) => x.id === s.sub);
   if (!u || u.blocked) return null;
   return toPublic(u);
 }

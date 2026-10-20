@@ -75,7 +75,7 @@ export async function saveLandAction(_: FormState, fd: FormData): Promise<FormSt
   const isAdmin = user.role === "admin";
   const id = str(fd, "id");
   const intent = str(fd, "intent") === "draft" ? "draft" : "publish";
-  const db0 = readDB();
+  const db0 = (await readDB());
   const existing = id ? db0.lands.find((l) => l.id === id) : undefined;
   if (id && !existing) return { error: "Listing not found." };
   if (existing && !isAdmin && existing.ownerId !== user.id) return { error: "You can only edit your own listings." };
@@ -260,7 +260,7 @@ export async function toggleSaveAction(landId: string): Promise<ToggleResult> {
 export async function expressInterestAction(landId: string, message?: string): Promise<ToggleResult> {
   const user = await getCurrentUser();
   if (!user) return { ok: false, needLogin: true };
-  const l = readDB().lands.find((x) => x.id === landId);
+  const l = (await readDB()).lands.find((x) => x.id === landId);
   if (!l) return { ok: false, message: "Land not found." };
   if (l.ownerId === user.id) return { ok: false, message: "This is your own listing." };
   await mutate((db) => {
@@ -276,7 +276,7 @@ export async function expressInterestAction(landId: string, message?: string): P
 /** Logs a call and returns the number to dial. */
 export async function logCallAction(landId: string): Promise<{ phone: string }> {
   const user = await getCurrentUser();
-  const db = readDB();
+  const db = (await readDB());
   const l = db.lands.find((x) => x.id === landId);
   if (!l) return { phone: "18001234567" };
   const owner = db.users.find((u) => u.id === l.ownerId);

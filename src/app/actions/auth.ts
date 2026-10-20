@@ -20,7 +20,7 @@ export async function loginAction(_: FormState, fd: FormData): Promise<FormState
   const password = String(fd.get("password") || "");
   if (!email || !password) return { error: "Please enter your email and password." };
 
-  const user = readDB().users.find((u) => u.email.toLowerCase() === email);
+  const user = (await readDB()).users.find((u) => u.email.toLowerCase() === email);
   if (!user || !(await bcrypt.compare(password, user.passwordHash))) return { error: "Invalid email or password." };
   if (user.blocked) return { error: "Your account has been blocked. Please contact support." };
 
@@ -43,7 +43,7 @@ export async function signupAction(_: FormState, fd: FormData): Promise<FormStat
   if (!EMAIL_RE.test(email)) return { error: "Please enter a valid email address." };
   if (!/^[+\d][\d\s-]{8,}$/.test(phone)) return { error: "Please enter a valid mobile number." };
   if (password.length < 6) return { error: "Password must be at least 6 characters." };
-  if (readDB().users.some((u) => u.email.toLowerCase() === email)) return { error: "An account with this email already exists. Please log in." };
+  if ((await readDB()).users.some((u) => u.email.toLowerCase() === email)) return { error: "An account with this email already exists. Please log in." };
 
   const user: User = {
     id: newId(),

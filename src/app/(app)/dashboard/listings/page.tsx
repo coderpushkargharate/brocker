@@ -23,7 +23,7 @@ const CHIP: Record<string, string> = {
 export default async function ListingsPage() {
   const user = await requireUser(undefined, "/dashboard/listings");
   if (user.role === "investor") redirect("/dashboard/saved");
-  const db = readDB();
+  const db = (await readDB());
   const mine = db.lands.filter((l) => l.ownerId === user.id).sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt));
 
   return (

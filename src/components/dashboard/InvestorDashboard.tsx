@@ -63,8 +63,8 @@ function MiniRow({ land, right }: { land: Land; right?: React.ReactNode }) {
   );
 }
 
-export function InvestorDashboard({ user }: { user: PublicUser }) {
-  const db = readDB();
+export async function InvestorDashboard({ user }: { user: PublicUser }) {
+  const db = (await readDB());
   const prefs = user.preferences ?? DEFAULT_PREFS;
   const saved = new Set(user.saved);
   const lands = publicLands(db);

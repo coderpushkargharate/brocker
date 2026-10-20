@@ -14,8 +14,8 @@ const CHIP: Record<Enquiry["status"], string> = {
   resolved: "bg-[#dcfce7] text-[#166534]",
 };
 
-export default function AdminEnquiries() {
-  const list = [...readDB().enquiries].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
+export default async function AdminEnquiries() {
+  const list = [...(await readDB()).enquiries].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
   return (
     <>
       <PageTitle title="Enquiries" sub="Messages from the contact form and service requests." />

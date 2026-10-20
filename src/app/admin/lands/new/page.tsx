@@ -3,8 +3,8 @@ import { ListingForm } from "@/components/listing/ListingForm";
 
 export const metadata = { title: "Add New Land" };
 
-export default function AdminNewLand() {
-  const owners = readDB()
+export default async function AdminNewLand() {
+  const owners = (await readDB())
     .users.filter((u) => u.role === "farmer" || u.role === "admin")
     .map((u) => ({ id: u.id, name: `${u.name}${u.role === "admin" ? " (Admin)" : ""}` }));
   return (

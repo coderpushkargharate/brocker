@@ -113,7 +113,7 @@ export async function createUserAction(_: FormState, fd: FormData): Promise<Form
   const role: Role = roleIn === "admin" ? "admin" : roleIn === "investor" ? "investor" : "farmer";
   if (name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "Please enter a valid name and email." };
   if (password.length < 6) return { error: "Password must be at least 6 characters." };
-  if (readDB().users.some((u) => u.email === email)) return { error: "A user with this email already exists." };
+  if ((await readDB()).users.some((u) => u.email === email)) return { error: "A user with this email already exists." };
   const hash = await bcrypt.hash(password, 10);
   await mutate((db) => {
     db.users.push({
@@ -156,7 +156,7 @@ export async function changePasswordAction(_: FormState, fd: FormData): Promise<
   const me = await requireUser();
   const current = String(fd.get("current") || "");
   const next = String(fd.get("password") || "");
-  const u = readDB().users.find((x) => x.id === me.id)!;
+  const u = (await readDB()).users.find((x) => x.id === me.id)!;
   if (!(await bcrypt.compare(current, u.passwordHash))) return { error: "Current password is incorrect." };
   if (next.length < 6) return { error: "New password must be at least 6 characters." };
   const hash = await bcrypt.hash(next, 10);

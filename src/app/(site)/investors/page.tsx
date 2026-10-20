@@ -5,6 +5,7 @@ import { PageHero } from "@/components/PageHero";
 import { ExploreLocations, HowItWorks, LandTypes, ReadyBanner, SectionHead, WhyChoose } from "@/components/home/Sections";
 import { LandCard } from "@/components/LandCard";
 import { getCurrentUser } from "@/lib/auth";
+import { readDB } from "@/lib/db";
 import { districtCounts, matchScore, publicLands } from "@/lib/lands";
 
 export const metadata: Metadata = {
@@ -24,7 +25,7 @@ const PERKS = [
 
 export default async function InvestorsPage() {
   const user = await getCurrentUser();
-  const lands = [...publicLands()].sort((a, b) => b.stats.views - a.stats.views).slice(0, 3);
+  const lands = [...publicLands(await readDB())].sort((a, b) => b.stats.views - a.stats.views).slice(0, 3);
   const saved = new Set(user?.saved ?? []);
   return (
     <>
@@ -66,7 +67,7 @@ export default async function InvestorsPage() {
           <WhyChoose />
           <HowItWorks />
         </div>
-        <ExploreLocations counts={districtCounts()} />
+        <ExploreLocations counts={districtCounts(await readDB())} />
         <LandTypes />
         <ReadyBanner />
       </div>

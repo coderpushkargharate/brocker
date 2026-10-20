@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "Notifications" };
 
 export default async function NotificationsPage() {
   const user = await requireUser(undefined, "/dashboard/notifications");
-  const notes = readDB()
+  const notes = (await readDB())
     .notifications.filter((n) => n.userId === user.id)
     .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
   const unread = notes.filter((n) => !n.read).length;

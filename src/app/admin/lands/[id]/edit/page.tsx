@@ -6,7 +6,7 @@ export const metadata = { title: "Edit Land" };
 
 export default async function AdminEditLand({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const db = readDB();
+  const db = (await readDB());
   const land = db.lands.find((l) => l.id === id);
   if (!land) notFound();
   const owners = db.users.filter((u) => u.role === "farmer" || u.role === "admin").map((u) => ({ id: u.id, name: `${u.name}${u.role === "admin" ? " (Admin)" : ""}` }));

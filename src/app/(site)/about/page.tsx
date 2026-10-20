@@ -13,8 +13,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/about" },
 };
 
-export default function AboutPage() {
-  const db = readDB();
+export default async function AboutPage() {
+  const db = (await readDB());
   const stats = [
     ["5000+", "Verified customers"],
     ["₹250Cr+", "Worth transactions"],

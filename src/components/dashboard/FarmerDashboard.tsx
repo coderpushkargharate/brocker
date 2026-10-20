@@ -44,8 +44,8 @@ const STATUS_CHIP: Record<string, string> = {
   sold: "bg-[#2563eb] text-white",
 };
 
-export function FarmerDashboard({ user }: { user: PublicUser }) {
-  const db = readDB();
+export async function FarmerDashboard({ user }: { user: PublicUser }) {
+  const db = (await readDB());
   const mine = db.lands.filter((l) => l.ownerId === user.id).sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt));
   const ids = mine.map((l) => l.id);
   const interests = db.interests.filter((i) => ids.includes(i.landId)).sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));

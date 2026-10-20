@@ -8,8 +8,8 @@ import { Img, FALLBACK_LAND_IMAGE } from "@/components/Img";
 
 export const metadata = { title: "Overview" };
 
-export default function AdminHome() {
-  const db = readDB();
+export default async function AdminHome() {
+  const db = (await readDB());
   const pending = db.lands.filter((l) => l.status === "pending");
   const stats = [
     { label: "Total Land Projects", v: db.lands.length, sub: `${db.lands.filter((l) => l.status === "active").length} live`, icon: Map, href: "/admin/lands" },

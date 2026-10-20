@@ -13,7 +13,7 @@ export const metadata: Metadata = { title: "Investor Interests" };
 
 export default async function InterestsPage() {
   const user = await requireUser(["farmer", "investor"], "/dashboard/interests");
-  const db = readDB();
+  const db = (await readDB());
   const farmer = user.role === "farmer";
   const myLandIds = new Set(db.lands.filter((l) => l.ownerId === user.id).map((l) => l.id));
   const list = db.interests

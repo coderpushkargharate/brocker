@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: { default: "Admin", template: "%s | A
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser(["admin"], "/admin");
-  const db = readDB();
+  const db = (await readDB());
   return (
     <div className="min-h-screen bg-page lg:flex">
       <AdminNav name={user.name} counts={{ pending: db.lands.filter((l) => l.status === "pending").length, enquiries: db.enquiries.filter((e) => e.status === "new").length }} />

@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "Saved Lands" };
 
 export default async function SavedPage() {
   const user = await requireUser(undefined, "/dashboard/saved");
-  const db = readDB();
+  const db = (await readDB());
   const lands = user.saved.map((id) => db.lands.find((l) => l.id === id)).filter((l): l is Land => !!l && l.status === "active");
   return (
     <div className="container-dash pt-8">

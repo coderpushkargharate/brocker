@@ -17,7 +17,7 @@ export const metadata = { title: "Review Land" };
 
 export default async function AdminLandReview({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const db = readDB();
+  const db = (await readDB());
   const land = db.lands.find((l) => l.id === id);
   if (!land) notFound();
   const owner = db.users.find((u) => u.id === land.ownerId);

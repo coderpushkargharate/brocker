@@ -6,8 +6,8 @@ import { InterestStatusSelect } from "@/components/dashboard/ClientWidgets";
 
 export const metadata = { title: "Investor Interests" };
 
-export default function AdminInterests() {
-  const db = readDB();
+export default async function AdminInterests() {
+  const db = (await readDB());
   const list = [...db.interests].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
   return (
     <>

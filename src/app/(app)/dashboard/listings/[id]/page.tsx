@@ -24,7 +24,7 @@ export default async function SellerListingPage({ params, searchParams }: { para
   const { id } = await params;
   const { saved } = await searchParams;
   const user = await requireUser(["farmer"], `/dashboard/listings/${id}`);
-  const db = readDB();
+  const db = (await readDB());
   const land = db.lands.find((l) => l.id === id);
   if (!land || land.ownerId !== user.id) notFound();
 

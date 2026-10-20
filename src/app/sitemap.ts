@@ -1,13 +1,14 @@
 import type { MetadataRoute } from "next";
 import { site, DISTRICTS, LAND_CATEGORIES } from "@/lib/config";
 import { publicLands } from "@/lib/lands";
+import { readDB } from "@/lib/db";
 
 // rebuilt on every request so new land projects appear in Google immediately
 export const dynamic = "force-dynamic";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
-  const lands = publicLands();
+  const lands = publicLands(await readDB());
   const statics: [string, number, MetadataRoute.Sitemap[number]["changeFrequency"]][] = [
     ["", 1, "daily"],
     ["/buy-land", 0.9, "daily"],

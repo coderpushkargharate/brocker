@@ -7,6 +7,7 @@ import { LandCard } from "@/components/LandCard";
 import { BuySellCards, ExploreLocations, FaqSection, HowItWorks, LandServices, LandTypes, ReadyBanner, SectionHead, SellBanner, WhyChoose } from "@/components/home/Sections";
 import { JsonLd } from "@/components/JsonLd";
 import { getCurrentUser } from "@/lib/auth";
+import { readDB } from "@/lib/db";
 import { districtCounts, matchScore, publicLands } from "@/lib/lands";
 import { FAQS } from "@/lib/faqs";
 import { site } from "@/lib/config";
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   const user = await getCurrentUser();
-  const lands = publicLands();
+  const lands = publicLands(await readDB());
   const featured = [...lands].sort((a, b) => Number(b.featured) - Number(a.featured) || b.stats.views - a.stats.views).slice(0, 3);
   const recent = [...lands].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)).slice(0, 3);
   const saved = new Set(user?.saved ?? []);
@@ -92,7 +93,7 @@ export default async function HomePage() {
           <HowItWorks />
         </div>
 
-        <ExploreLocations counts={districtCounts()} />
+        <ExploreLocations counts={districtCounts(await readDB())} />
         <LandTypes />
         <SellBanner />
 

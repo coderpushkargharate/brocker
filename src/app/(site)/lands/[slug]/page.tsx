@@ -39,7 +39,7 @@ type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const l = getLandBySlug(slug);
+  const l = await getLandBySlug(slug);
   if (!l) return { title: "Land not found", robots: { index: false } };
   const where = `${l.taluka}, ${l.district}`;
   const title = `${l.title} – ${areaShort(l.area, l.areaUnit)} for Sale in ${where}`;
@@ -56,13 +56,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function LandPage({ params }: Props) {
   const { slug } = await params;
-  const land = getLandBySlug(slug);
+  const land = await getLandBySlug(slug);
   if (!land) notFound();
   const user = await getCurrentUser();
   const isOwner = user?.id === land.ownerId;
   if (land.status !== "active" && !isOwner && user?.role !== "admin") notFound();
 
-  const db = readDB();
+  const db = (await readDB());
   const ownerRaw = db.users.find((u) => u.id === land.ownerId);
   const owner = ownerRaw ? toPublic(ownerRaw) : undefined;
   const interests = db.interests.filter((i) => i.landId === land.id).sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
@@ -71,7 +71,7 @@ export default async function LandPage({ params }: Props) {
   const visits = interests.filter((i) => ["contacted", "responded"].includes(i.status)).length;
   const saved = new Set(user?.saved ?? []);
   const interested = !!user && interests.some((i) => i.investorId === user.id);
-  const similar = similarLands(land, 8);
+  const similar = similarLands(land, 8, db);
   const url = `${site.url}/lands/${land.slug}`;
   const crop = land.currentCrop && !/none/i.test(land.currentCrop) ? land.currentCrop : "Multiple Crops";
 

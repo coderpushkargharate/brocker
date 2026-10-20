@@ -3,7 +3,13 @@ export const site = {
   tagline: "Trusted Agriculture Land Marketplace",
   description:
     "A trusted marketplace connecting agricultural landowners with genuine investors through secure, transparent, and profitable land deals across Maharashtra and India.",
-  url: (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, ""),
+  // your real domain; on Vercel it falls back to the project's production domain automatically
+  url: (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "") ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "") ||
+    "http://localhost:3000"
+  ).replace(/\/$/, ""),
   supportPhone: "1800-123-4567",
   supportPhoneHref: "tel:18001234567",
   whatsapp: "https://wa.me/918001234567",
