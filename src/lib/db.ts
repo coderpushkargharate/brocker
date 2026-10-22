@@ -3,6 +3,7 @@ import path from "path";
 import postgres from "postgres";
 import type { DB } from "./types";
 import { buildSeed } from "./seed";
+import { normalizeLandType } from "./config";
 
 /**
  * Storage for the whole app state.
@@ -27,7 +28,7 @@ function sql() {
   if (!cache.sql) {
     cache.sql = postgres(PG_URL, {
       ssl: /localhost|127\.0\.0\.1/.test(PG_URL) ? false : "require",
-      max: 3,
+      max: Number(process.env.PG_POOL_MAX) || 3,
       idle_timeout: 20,
       prepare: false, // works with pgbouncer / Neon / Supabase poolers
     });
@@ -110,22 +111,29 @@ let queue: Promise<unknown> = Promise.resolve();
 
 // ---------- public API ----------
 
+/** Small in-place fixes so data saved by older versions still fits the current app. */
+function upgrade(db: DB) {
+  db.views ??= [];
+  for (const l of db.lands) l.landType = normalizeLandType(l.landType);
+  for (const u of db.users) if (u.preferences) u.preferences.landType = normalizeLandType(u.preferences.landType);
+}
+
 /** Read the whole database. Treat the result as read-only; use mutate() to change data. */
 export async function readDB(): Promise<DB> {
   const db = usingPostgres ? await pgRead() : fileRead();
-  db.views ??= [];
+  upgrade(db);
   return db;
 }
 
 /** Apply a change and save it. */
 export function mutate<T>(fn: (db: DB) => T): Promise<T> {
   if (usingPostgres) return pgMutate((db) => {
-    db.views ??= [];
+    upgrade(db);
     return fn(db);
   });
   const run = queue.then(() => {
     const db = structuredClone(fileRead());
-    db.views ??= [];
+    upgrade(db);
     const result = fn(db);
     fileWrite(db);
     return result;

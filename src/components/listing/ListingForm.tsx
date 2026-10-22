@@ -108,7 +108,7 @@ export function ListingForm({ land, isAdmin, owners, backHref = "/dashboard" }: 
 
   const [f, setF] = useState({
     title: land?.title ?? "",
-    landType: land?.landType ?? "Agricultural",
+    landType: land?.landType ?? "Agriculture Land",
     area: land?.area ? String(land.area) : "",
     areaUnit: land?.areaUnit ?? "Acres",
     currentCrop: land?.currentCrop ?? "Sugarcane",

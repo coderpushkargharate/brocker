@@ -331,7 +331,6 @@ export async function FarmerDashboard({ user }: { user: PublicUser }) {
           </div>
           <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 text-[14.5px]">
             {[
-              ["Email", user.email],
               ["District", user.district],
               ["Mobile", user.phone],
               ["State", user.state],

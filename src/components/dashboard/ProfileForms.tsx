@@ -48,7 +48,8 @@ export function ProfileForm({ user }: { user: PublicUser }) {
         <div>
           <p className="text-[18px] font-semibold text-ink">{user.name}</p>
           <p className="text-[13.5px] capitalize text-muted">
-            {user.role} • {user.email}
+            {user.role === "investor" ? "Buyer" : user.role}
+            {user.email ? ` • ${user.email}` : ""}
           </p>
         </div>
       </div>

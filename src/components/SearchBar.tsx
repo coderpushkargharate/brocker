@@ -52,7 +52,7 @@ export function SearchBar({
 }) {
   const [district, setDistrict] = useState(defaults?.district ?? "Pune");
   const [taluka, setTaluka] = useState(defaults?.taluka ?? "");
-  const [type, setType] = useState(defaults?.type ?? "Agricultural");
+  const [type, setType] = useState(defaults?.type ?? "Agriculture Land");
   const [budget, setBudget] = useState(defaults?.budget ?? `${BUDGETS[1].min}-${BUDGETS[1].max}`);
 
   const talukas = district ? SUB_DISTRICTS[district] ?? [] : [];

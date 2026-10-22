@@ -240,9 +240,11 @@ export default async function SellerListingPage({ params, searchParams }: { para
                           <span className="h-1.5 w-1.5 rounded-full bg-[#22c55e]" /> Interested {timeAgo(i.createdAt)}
                         </span>
                         <span className="flex gap-2">
-                          <a href={`mailto:${inv.email}`} className="btn btn-outline h-8 px-3 text-[13px]">
-                            Email
-                          </a>
+                          {inv.email && (
+                            <a href={`mailto:${inv.email}`} className="btn btn-outline h-8 px-3 text-[13px]">
+                              Email
+                            </a>
+                          )}
                           <a href={`tel:${inv.phone.replace(/[^\d+]/g, "")}`} className="btn btn-primary h-8 px-3 text-[13px]">
                             <Phone className="h-3.5 w-3.5" /> Call
                           </a>

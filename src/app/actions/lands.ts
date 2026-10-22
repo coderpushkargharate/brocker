@@ -142,7 +142,7 @@ export async function saveLandAction(_: FormState, fd: FormData): Promise<FormSt
 
   const fields = {
     title,
-    landType: str(fd, "landType") || "Agricultural",
+    landType: str(fd, "landType") || "Agriculture Land",
     category: str(fd, "category") || deriveCategory(fd, area),
     area,
     areaUnit: str(fd, "areaUnit") || "Acres",
@@ -379,7 +379,7 @@ export async function updatePreferencesAction(_: FormState, fd: FormData): Promi
       budgetMax: bMax || 1_000_000_000,
       areaMin: aMin || 0,
       areaMax: aMax || 100000,
-      landType: str(fd, "landType") || "Agricultural",
+      landType: str(fd, "landType") || "Agriculture Land",
       alerts: fd.get("alerts") === "on",
     };
   });
@@ -394,7 +394,7 @@ export async function toggleAlertsAction() {
   const user = await requireUser();
   await mutate((db) => {
     const u = db.users.find((x) => x.id === user.id)!;
-    u.preferences = { ...(u.preferences ?? { district: "Pune", budgetMin: 1_000_000, budgetMax: 3_000_000, areaMin: 2, areaMax: 10, landType: "Agricultural", alerts: false }) };
+    u.preferences = { ...(u.preferences ?? { district: "Pune", budgetMin: 1_000_000, budgetMax: 3_000_000, areaMin: 2, areaMax: 10, landType: "Agriculture Land", alerts: false }) };
     u.preferences.alerts = !u.preferences.alerts;
   });
   refresh();
@@ -402,14 +402,13 @@ export async function toggleAlertsAction() {
 
 export async function contactAction(_: FormState, fd: FormData): Promise<FormState> {
   const name = str(fd, "name");
-  const email = str(fd, "email");
   const phone = str(fd, "phone");
   const message = str(fd, "message");
   if (name.length < 2) return { error: "Please enter your name." };
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && !/^[+\d][\d\s-]{8,}$/.test(phone)) return { error: "Please enter a valid email or phone number." };
+  if (!/^[+\d][\d\s-]{8,}$/.test(phone)) return { error: "Please enter a valid mobile number." };
   if (message.length < 5) return { error: "Please write a short message." };
   await mutate((db) => {
-    db.enquiries.push({ id: newId(), name, email, phone, subject: str(fd, "subject") || "General", message: message.slice(0, 2000), status: "new", createdAt: now() });
+    db.enquiries.push({ id: newId(), name, email: "", phone, subject: str(fd, "subject") || "General", message: message.slice(0, 2000), status: "new", createdAt: now() });
     for (const a of db.users.filter((u) => u.role === "admin")) notify(db, { userId: a.id, kind: "message", text: `New enquiry from ${name}: ${str(fd, "subject") || "General"}`, link: "/admin/enquiries" });
   });
   return { ok: "Thank you! Our team will contact you within 24 hours." };

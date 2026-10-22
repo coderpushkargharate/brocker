@@ -53,7 +53,15 @@ export const SUB_DISTRICTS: Record<string, string[]> = {
 
 export const STATES = ["Maharashtra", "Karnataka", "Gujarat", "Madhya Pradesh", "Goa"];
 
-export const PROPERTY_TYPES = ["Agricultural", "Farmhouse", "Orchard", "Plantation", "NA Plot"];
+export const PROPERTY_TYPES = ["Agriculture Land", "Plot", "Farmhouse"];
+
+/** Map any land type (including old ones like "Orchard" or "NA Plot") to one of PROPERTY_TYPES. */
+export function normalizeLandType(t?: string) {
+  const s = (t || "").toLowerCase();
+  if (s.includes("farmhouse")) return "Farmhouse";
+  if (s.includes("plot")) return "Plot";
+  return "Agriculture Land";
+}
 
 export const LAND_CATEGORIES = [
   { slug: "crop-land", name: "Crop Land", image: "/images/type-crop.jpg" },

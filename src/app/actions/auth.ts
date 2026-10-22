@@ -8,7 +8,8 @@ import type { Role, User } from "@/lib/types";
 
 export type FormState = { error?: string; ok?: string } | undefined;
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** Last 10 digits, so "+91 98765 43210" and "9876543210" match. */
+const phoneKey = (p: string) => p.replace(/\D/g, "").slice(-10);
 
 function safeNext(next: FormDataEntryValue | null, fallback: string) {
   const n = typeof next === "string" ? next : "";
@@ -16,12 +17,17 @@ function safeNext(next: FormDataEntryValue | null, fallback: string) {
 }
 
 export async function loginAction(_: FormState, fd: FormData): Promise<FormState> {
-  const email = String(fd.get("email") || "").trim().toLowerCase();
+  const login = String(fd.get("login") || fd.get("email") || "").trim().toLowerCase();
   const password = String(fd.get("password") || "");
-  if (!email || !password) return { error: "Please enter your email and password." };
+  if (!login || !password) return { error: "Please enter your mobile number and password." };
 
-  const user = (await readDB()).users.find((u) => u.email.toLowerCase() === email);
-  if (!user || !(await bcrypt.compare(password, user.passwordHash))) return { error: "Invalid email or password." };
+  const users = (await readDB()).users;
+  const user = login.includes("@")
+    ? users.find((u) => u.email.toLowerCase() === login)
+    : phoneKey(login).length === 10
+      ? users.find((u) => u.phone && phoneKey(u.phone) === phoneKey(login))
+      : undefined;
+  if (!user || !(await bcrypt.compare(password, user.passwordHash))) return { error: "Invalid mobile number or password." };
   if (user.blocked) return { error: "Your account has been blocked. Please contact support." };
 
   await startSession(user);
@@ -33,22 +39,20 @@ export async function loginAction(_: FormState, fd: FormData): Promise<FormState
 
 export async function signupAction(_: FormState, fd: FormData): Promise<FormState> {
   const name = String(fd.get("name") || "").trim();
-  const email = String(fd.get("email") || "").trim().toLowerCase();
   const phone = String(fd.get("phone") || "").trim();
   const password = String(fd.get("password") || "");
   const role = (String(fd.get("role") || "investor") === "farmer" ? "farmer" : "investor") as Role;
   const district = String(fd.get("district") || "").trim();
 
   if (name.length < 2) return { error: "Please enter your full name." };
-  if (!EMAIL_RE.test(email)) return { error: "Please enter a valid email address." };
-  if (!/^[+\d][\d\s-]{8,}$/.test(phone)) return { error: "Please enter a valid mobile number." };
+  if (!/^[+\d][\d\s-]{8,}$/.test(phone) || phoneKey(phone).length !== 10) return { error: "Please enter a valid 10-digit mobile number." };
   if (password.length < 6) return { error: "Password must be at least 6 characters." };
-  if ((await readDB()).users.some((u) => u.email.toLowerCase() === email)) return { error: "An account with this email already exists. Please log in." };
+  if ((await readDB()).users.some((u) => u.phone && phoneKey(u.phone) === phoneKey(phone))) return { error: "An account with this mobile number already exists. Please log in." };
 
   const user: User = {
     id: newId(),
     name,
-    email,
+    email: "",
     phone,
     role,
     district: district || undefined,

@@ -25,14 +25,8 @@ export function ContactForm({ subject }: { subject?: string }) {
           <label className="label" htmlFor="c-phone">
             Mobile number
           </label>
-          <input id="c-phone" name="phone" type="tel" className="input" autoComplete="tel" />
+          <input id="c-phone" name="phone" type="tel" required className="input" autoComplete="tel" />
         </div>
-      </div>
-      <div>
-        <label className="label" htmlFor="c-email">
-          Email
-        </label>
-        <input id="c-email" name="email" type="email" className="input" autoComplete="email" />
       </div>
       <div>
         <label className="label" htmlFor="c-subject">

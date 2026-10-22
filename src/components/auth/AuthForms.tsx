@@ -36,10 +36,10 @@ export function LoginForm({ next }: { next?: string }) {
       <input type="hidden" name="next" value={next ?? ""} />
       <Alert error={state?.error} />
       <div>
-        <label className="label" htmlFor="email">
-          Email address
+        <label className="label" htmlFor="login">
+          Mobile number or email
         </label>
-        <input id="email" name="email" type="email" required autoComplete="email" className="input" placeholder="you@example.com" />
+        <input id="login" name="login" type="text" required autoComplete="username" className="input" placeholder="98765 43210" />
       </div>
       <Password autoComplete="current-password" />
       <button type="submit" disabled={pending} className="btn btn-primary h-12 w-full text-[15px]">
@@ -59,8 +59,8 @@ export function SignupForm({ next, defaultRole }: { next?: string; defaultRole?:
   const [state, action, pending] = useActionState(signupAction, undefined);
   const [role, setRole] = useState(defaultRole === "farmer" ? "farmer" : "investor");
   const roles = [
-    { v: "farmer", t: "I'm a Farmer", d: "I want to sell / list my land", icon: Sprout },
-    { v: "investor", t: "I'm an Investor", d: "I want to buy agricultural land", icon: TrendingUp },
+    { v: "investor", t: "I want to Buy", d: "Find verified agricultural land", icon: TrendingUp },
+    { v: "farmer", t: "I want to Sell", d: "List my land as a farmer", icon: Sprout },
   ];
   return (
     <form action={action} className="space-y-4">
@@ -89,19 +89,11 @@ export function SignupForm({ next, defaultRole }: { next?: string; defaultRole?:
         </label>
         <input id="name" name="name" required autoComplete="name" className="input" placeholder="Rajesh Kumar" />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className="label" htmlFor="email">
-            Email address
-          </label>
-          <input id="email" name="email" type="email" required autoComplete="email" className="input" />
-        </div>
-        <div>
-          <label className="label" htmlFor="phone">
-            Mobile number
-          </label>
-          <input id="phone" name="phone" type="tel" required autoComplete="tel" className="input" placeholder="+91 98765 43210" />
-        </div>
+      <div>
+        <label className="label" htmlFor="phone">
+          Mobile number
+        </label>
+        <input id="phone" name="phone" type="tel" required autoComplete="tel" className="input" placeholder="+91 98765 43210" />
       </div>
       <div>
         <label className="label" htmlFor="district">

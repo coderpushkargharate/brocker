@@ -1,7 +1,7 @@
 import { readDB } from "./db";
 import type { DB, Land, Preferences, PublicUser, User } from "./types";
 import { toPublic } from "./auth";
-import { BUDGETS, AREAS } from "./config";
+import { BUDGETS, AREAS, normalizeLandType } from "./config";
 
 export const PAGE_SIZE = 6;
 
@@ -49,7 +49,7 @@ export function searchLands(q: LandQuery, db: DB) {
   let list = publicLands(db);
   if (q.district) list = list.filter((l) => l.district.toLowerCase() === q.district!.toLowerCase());
   if (q.taluka) list = list.filter((l) => l.taluka.toLowerCase() === q.taluka!.toLowerCase());
-  if (q.type) list = list.filter((l) => l.landType.toLowerCase() === q.type!.toLowerCase());
+  if (q.type) list = list.filter((l) => l.landType === normalizeLandType(q.type));
   if (q.category) list = list.filter((l) => l.category === q.category);
   const b = parseRange(q.budget);
   if (b) list = list.filter((l) => l.price >= b[0] && l.price <= b[1]);
@@ -91,7 +91,7 @@ export const DEFAULT_PREFS: Preferences = {
   budgetMax: BUDGETS[1].max,
   areaMin: AREAS[1].min,
   areaMax: AREAS[1].max,
-  landType: "Agricultural",
+  landType: "Agriculture Land",
   alerts: true,
 };
 

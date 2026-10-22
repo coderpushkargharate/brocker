@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!l) return { title: "Land not found", robots: { index: false } };
   const where = `${l.taluka}, ${l.district}`;
   const title = `${l.title} – ${areaShort(l.area, l.areaUnit)} for Sale in ${where}`;
-  const description = `${areaShort(l.area, l.areaUnit)} ${l.landType.toLowerCase()} land for sale in ${l.village}, ${where}, ${l.state} at ${inr(l.price)} (${inr(perAcre(l.price, l.area))}/acre). ${l.soilType}, ${l.waterSource} water, ${l.roadAccess.toLowerCase()}.${l.verified ? " Verified documents." : ""} Contact the farmer directly on AgriLand.`;
+  const description = `${areaShort(l.area, l.areaUnit)} ${l.landType.toLowerCase()} for sale in ${l.village}, ${where}, ${l.state} at ${inr(l.price)} (${inr(perAcre(l.price, l.area))}/acre). ${l.soilType}, ${l.waterSource} water, ${l.roadAccess.toLowerCase()}.${l.verified ? " Verified documents." : ""} Contact the farmer directly on AgriLand.`;
   return {
     title,
     description,
@@ -101,7 +101,7 @@ export default async function LandPage({ params }: Props) {
         description: land.description || `${land.title} in ${land.village}, ${land.district}`,
         image: land.images.map((i) => (i.startsWith("http") ? i : site.url + i)),
         sku: land.code,
-        category: `${land.landType} Land`,
+        category: land.landType,
         brand: { "@type": "Brand", name: site.name },
         offers: {
           "@type": "Offer",

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Bell, ChevronDown, LayoutDashboard, LogOut, Menu, Plus, ShieldCheck, User as UserIcon, UserCircle2, X, Bookmark } from "lucide-react";
+import { Bell, ChevronDown, LayoutDashboard, List, LogOut, Menu, Plus, ShieldCheck, User as UserIcon, UserCircle2, X, Bookmark } from "lucide-react";
 import { Logo } from "./Logo";
 import { Avatar } from "./Avatar";
 import { logoutAction } from "@/app/actions/auth";
@@ -13,7 +13,6 @@ const NAV = [
   { href: "/", label: "Home" },
   { href: "/buy-land", label: "Buy Land" },
   { href: "/sell-land", label: "Sell Land" },
-  { href: "/investors", label: "Investors" },
   { href: "/about", label: "About Us" },
   { href: "/contact", label: "Contact" },
 ];
@@ -47,8 +46,10 @@ export function HeaderClient({ user, unread }: { user: U; unread: number }) {
     return () => document.removeEventListener("mousedown", onDoc);
   }, []);
 
-  const roleLabel = user?.role === "admin" ? "Admin" : user?.role === "farmer" ? "Farmer" : "Investor";
+  const roleLabel = user?.role === "admin" ? "Admin" : user?.role === "farmer" ? "Farmer" : "Buyer";
   const dash = user?.role === "admin" ? "/admin" : "/dashboard";
+  // buyer accounts can't list land, so they don't get the button
+  const postHref = user?.role === "investor" ? null : user?.role === "admin" ? "/admin/lands/new" : "/dashboard/listings/new";
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur">
@@ -73,6 +74,12 @@ export function HeaderClient({ user, unread }: { user: U; unread: number }) {
         </nav>
 
         <div className="flex items-center gap-3">
+          {postHref && (
+            <Link href={postHref} className="btn hidden h-11 rounded-lg border-2 border-brand bg-white px-4 text-[14.5px] text-brand hover:bg-mint-50 sm:inline-flex">
+              <Plus className="h-4 w-4" /> Post Listing
+              <span className="rounded bg-brand px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-white">Free</span>
+            </Link>
+          )}
           {user ? (
             <>
               <Link href="/dashboard/notifications" aria-label={`Notifications (${unread} unread)`} className="relative flex h-10 w-10 items-center justify-center rounded-full border border-line text-ink hover:bg-mint-50">
@@ -97,9 +104,14 @@ export function HeaderClient({ user, unread }: { user: U; unread: number }) {
                       {user.role === "admin" ? "Admin Panel" : "Dashboard"}
                     </MenuLink>
                     {user.role === "farmer" && (
-                      <MenuLink href="/dashboard/listings/new" icon={<Plus className="h-4 w-4" />}>
-                        Add New Listing
-                      </MenuLink>
+                      <>
+                        <MenuLink href="/dashboard/listings/new" icon={<Plus className="h-4 w-4" />}>
+                          Add New Listing
+                        </MenuLink>
+                        <MenuLink href="/dashboard/listings" icon={<List className="h-4 w-4" />}>
+                          My Listings
+                        </MenuLink>
+                      </>
                     )}
                     {user.role === "investor" && (
                       <MenuLink href="/dashboard/saved" icon={<Bookmark className="h-4 w-4" />}>
@@ -142,6 +154,16 @@ export function HeaderClient({ user, unread }: { user: U; unread: number }) {
                 {n.label}
               </Link>
             ))}
+            {user?.role === "farmer" && (
+              <Link href="/dashboard/listings" className={`rounded-lg px-3 py-3 text-[15px] font-medium ${path === "/dashboard/listings" ? "bg-mint-50 text-brand" : "text-ink"}`}>
+                My Listings
+              </Link>
+            )}
+            {postHref && (
+              <Link href={postHref} className="btn mt-2 h-11 border-2 border-brand bg-white text-brand">
+                <Plus className="h-4 w-4" /> Post Listing — Free
+              </Link>
+            )}
             {!user && (
               <Link href="/login" className="btn btn-primary mt-2 h-11">
                 <UserCircle2 className="h-5 w-5" /> Log in /Sign Up

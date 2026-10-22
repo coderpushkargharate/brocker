@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CircleHelp, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import { CircleHelp, MapPin, MessageCircle, Phone } from "lucide-react";
 import Link from "next/link";
 import { PageHero } from "@/components/PageHero";
 import { ContactForm } from "@/components/ContactForm";
@@ -16,7 +16,6 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
   const rows = [
     { icon: Phone, t: "Call Support", d: site.supportPhone, href: site.supportPhoneHref },
     { icon: MessageCircle, t: "WhatsApp Support", d: "Chat with us", href: site.whatsapp },
-    { icon: Mail, t: "Email", d: site.email, href: `mailto:${site.email}` },
     { icon: MapPin, t: "Office", d: "Pune, Maharashtra, India", href: "https://www.google.com/maps/search/?api=1&query=Pune" },
   ];
   return (

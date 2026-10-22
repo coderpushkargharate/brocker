@@ -50,7 +50,7 @@ export function LandCard({ land, saved, match, badge = "verified" }: { land: Lan
           </span>
         </div>
         <div className="mt-4 flex items-center justify-between">
-          <span className="chip bg-[#e8f6ee] font-medium text-sea">{land.landType} Land</span>
+          <span className="chip bg-[#e8f6ee] font-medium text-sea">{land.landType}</span>
           <span className="chip rounded-full bg-match text-sea">{match}% Match</span>
         </div>
         <Link href={`/lands/${land.slug}`} className="btn btn-primary mt-3 h-[42px] w-full text-[15px]" aria-label={`View details of ${land.title}`}>

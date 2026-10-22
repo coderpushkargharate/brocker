@@ -6,7 +6,7 @@ import { dashboardPath, getCurrentUser } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "Create a Free Account",
-  description: "Join AgriLand free as a farmer to list your agricultural land, or as an investor to find verified farm land across Maharashtra.",
+  description: "Join AgriLand free to sell your agricultural land, or to buy verified farm land across Maharashtra.",
   alternates: { canonical: "/signup" },
 };
 
