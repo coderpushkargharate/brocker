@@ -31,6 +31,9 @@ export function Footer() {
           <Link href="/buy-land" className="hover:text-white">Buy Land</Link>
           <Link href="/sell-land" className="hover:text-white">Sell Land</Link>
           <Link href="/services" className="hover:text-white">Services</Link>
+          <Link href="/business-services" className="hover:text-white">Business Services</Link>
+          <Link href="/labour" className="hover:text-white">Labour &amp; Workforce</Link>
+          <Link href="/list-business" className="hover:text-white">List Your Business</Link>
           <Link href="/faq" className="hover:text-white">FAQs</Link>
           <Link href="/about" className="hover:text-white">About Us</Link>
           <Link href="/contact" className="hover:text-white">Contact</Link>

@@ -10,7 +10,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const db = (await readDB());
   return (
     <div className="min-h-screen bg-page lg:flex">
-      <AdminNav name={user.name} counts={{ pending: db.lands.filter((l) => l.status === "pending").length, enquiries: db.enquiries.filter((e) => e.status === "new").length }} />
+      <AdminNav name={user.name} counts={{
+          pending: db.lands.filter((l) => l.status === "pending").length,
+          enquiries: db.enquiries.filter((e) => e.status === "new").length,
+          businesses: db.businesses.filter((b) => b.status === "pending").length,
+          workers: db.workers.filter((w) => w.status === "pending").length,
+          leads: db.serviceLeads.filter((l) => l.status === "new").length,
+          reviews: db.serviceReviews.filter((r) => r.status === "pending").length,
+        }} />
       <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
     </div>
   );

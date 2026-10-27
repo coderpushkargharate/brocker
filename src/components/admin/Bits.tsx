@@ -1,4 +1,10 @@
-import type { LandStatus } from "@/lib/types";
+import type { LandStatus, ProfileStatus } from "@/lib/types";
+
+export const PROFILE_CHIP: Record<ProfileStatus, string> = {
+  active: "bg-[#dcfce7] text-[#166534]",
+  pending: "bg-[#fef3c7] text-[#92400e]",
+  rejected: "bg-[#fee2e2] text-[#991b1b]",
+};
 
 export const STATUS_CHIP: Record<LandStatus, string> = {
   active: "bg-[#dcfce7] text-[#166534]",

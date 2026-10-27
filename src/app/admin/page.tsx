@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Check, Clock, Eye, Heart, Inbox, Map, Plus, Users, X } from "lucide-react";
+import { Check, Clock, Eye, HardHat, Heart, Inbox, Map, PhoneCall, Plus, Store, Users, X } from "lucide-react";
 import { readDB } from "@/lib/db";
 import { formatDate, inr, timeAgo } from "@/lib/format";
 import { setLandStatusAction } from "@/app/actions/admin";
@@ -17,6 +17,9 @@ export default async function AdminHome() {
     { label: "Users", v: db.users.length, sub: `${db.users.filter((u) => u.role === "farmer").length} farmers • ${db.users.filter((u) => u.role === "investor").length} investors`, icon: Users, href: "/admin/users" },
     { label: "Investor Interests", v: db.interests.length, sub: `${db.calls.length} calls logged`, icon: Heart, href: "/admin/interests" },
     { label: "Enquiries", v: db.enquiries.length, sub: `${db.enquiries.filter((e) => e.status === "new").length} new`, icon: Inbox, href: "/admin/enquiries" },
+    { label: "Businesses", v: db.businesses.length, sub: `${db.businesses.filter((b) => b.status === "pending").length} pending • ${db.businesses.filter((b) => b.premium).length} premium`, icon: Store, href: "/admin/businesses" },
+    { label: "Workers & Labour", v: db.workers.length, sub: `${db.workers.filter((w) => w.status === "pending").length} pending verification`, icon: HardHat, href: "/admin/workers" },
+    { label: "Service Leads", v: db.serviceLeads.length, sub: `${db.serviceLeads.filter((l) => l.status === "new").length} new`, icon: PhoneCall, href: "/admin/service-leads" },
     { label: "Total Views", v: db.lands.reduce((s, l) => s + l.stats.views, 0).toLocaleString("en-IN"), sub: "All listings", icon: Eye, href: "/admin/lands?sort=views" },
   ];
   const recentUsers = [...db.users].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)).slice(0, 5);
@@ -29,7 +32,7 @@ export default async function AdminHome() {
         </Link>
       </PageTitle>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5">
         {stats.map((s) => (
           <Link key={s.label} href={s.href} className="rounded-2xl border border-line bg-white p-4 shadow-card hover:shadow-soft">
             <s.icon className="h-5 w-5 text-brand" />

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ExternalLink, Heart, Inbox, LayoutDashboard, LogOut, Map, Menu, Plus, Users, X } from "lucide-react";
+import { ExternalLink, Heart, Inbox, LayoutDashboard, LogOut, Map, Menu, Plus, Users, X, Store, HardHat, PhoneCall, Star, Tags, Settings } from "lucide-react";
 import { logoutAction } from "@/app/actions/auth";
 import { LogoMark } from "../Logo";
 
@@ -16,15 +16,42 @@ const LINKS = [
   { href: "/admin/enquiries", label: "Enquiries", icon: Inbox },
 ];
 
-export function AdminNav({ name, counts }: { name: string; counts: { pending: number; enquiries: number } }) {
+const SERVICE_LINKS = [
+  { href: "/admin/businesses", label: "Businesses", icon: Store },
+  { href: "/admin/workers", label: "Workers & Labour", icon: HardHat },
+  { href: "/admin/service-leads", label: "Leads & Requirements", icon: PhoneCall },
+  { href: "/admin/service-reviews", label: "Reviews", icon: Star },
+  { href: "/admin/service-categories", label: "Categories", icon: Tags },
+  { href: "/admin/service-settings", label: "Service Settings", icon: Settings },
+];
+
+type Counts = { pending: number; enquiries: number; businesses?: number; workers?: number; leads?: number; reviews?: number };
+
+export function AdminNav({ name, counts }: { name: string; counts: Counts }) {
   const path = usePathname();
   const [open, setOpen] = useState(false);
-  const isOn = (l: (typeof LINKS)[number]) => (l.exact ? path === l.href : path.startsWith(l.href) && !(l.href === "/admin/lands" && path === "/admin/lands/new"));
+  const isOn = (l: { href: string; exact?: boolean }) => (l.exact ? path === l.href : path.startsWith(l.href) && !(l.href === "/admin/lands" && path === "/admin/lands/new"));
+  const serviceBadge: Record<string, number | undefined> = { "/admin/businesses": counts.businesses, "/admin/workers": counts.workers, "/admin/service-leads": counts.leads, "/admin/service-reviews": counts.reviews };
 
   const nav = (
-    <nav className="flex flex-1 flex-col gap-1 p-3" aria-label="Admin">
+    <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-3" aria-label="Admin">
       {LINKS.map((l) => {
         const badge = l.href === "/admin/lands" ? counts.pending : l.href === "/admin/enquiries" ? counts.enquiries : 0;
+        return (
+          <Link
+            key={l.href}
+            href={l.href}
+            onClick={() => setOpen(false)}
+            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14.5px] font-medium ${isOn(l) ? "bg-brand text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}`}
+          >
+            <l.icon className="h-[18px] w-[18px]" /> {l.label}
+            {badge > 0 && <span className="ml-auto rounded-full bg-[#f59e0b] px-2 text-[11px] font-bold text-white">{badge}</span>}
+          </Link>
+        );
+      })}
+      <p className="mt-3 px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-white/45">Services &amp; Labour</p>
+      {SERVICE_LINKS.map((l) => {
+        const badge = serviceBadge[l.href] ?? 0;
         return (
           <Link
             key={l.href}

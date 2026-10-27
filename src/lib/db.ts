@@ -8,6 +8,7 @@ type Doc = { _id: string; [k: string]: unknown };
 import type { DB } from "./types";
 import { buildSeed } from "./seed";
 import { normalizeLandType } from "./config";
+import { DEFAULT_SERVICE_SETTINGS, SERVICE_CATEGORIES, seedBusinesses, seedServiceReviews, seedWorkers } from "./services-seed";
 
 /**
  * Storage for the whole app state.
@@ -96,7 +97,7 @@ async function pgMutate<T>(fn: (db: DB) => T): Promise<T> {
 // Each list in DB is its own collection; a "meta" document holds the counters and a version number
 // that goes up on every save, so concurrent saves can't overwrite each other.
 
-const LISTS = ["users", "lands", "interests", "notifications", "calls", "enquiries", "views"] as const;
+const LISTS = ["users", "lands", "interests", "notifications", "calls", "enquiries", "views", "serviceCategories", "businesses", "workers", "serviceLeads", "serviceReviews", "serviceSettings"] as const;
 type ListName = (typeof LISTS)[number];
 const META_ID = "state";
 
@@ -264,6 +265,22 @@ let queue: Promise<unknown> = Promise.resolve();
 /** Small in-place fixes so data saved by older versions still fits the current app. */
 function upgrade(db: DB) {
   db.views ??= [];
+  db.counters ??= { landCode: 9900 };
+  db.serviceCategories ??= [];
+  db.businesses ??= [];
+  db.workers ??= [];
+  db.serviceLeads ??= [];
+  db.serviceReviews ??= [];
+  db.serviceSettings ??= [];
+  // first run after the Business Services & Labour update: add the categories and demo profiles once
+  if (!db.counters.servicesSeeded) {
+    if (!db.serviceCategories.length) db.serviceCategories = structuredClone(SERVICE_CATEGORIES);
+    if (!db.businesses.length) db.businesses = seedBusinesses();
+    if (!db.workers.length) db.workers = seedWorkers();
+    if (!db.serviceReviews.length) db.serviceReviews = seedServiceReviews();
+    db.counters.servicesSeeded = true;
+  }
+  if (!db.serviceSettings.length) db.serviceSettings = [{ ...DEFAULT_SERVICE_SETTINGS }];
   for (const l of db.lands) l.landType = normalizeLandType(l.landType);
   for (const u of db.users) if (u.preferences) u.preferences.landType = normalizeLandType(u.preferences.landType);
 }

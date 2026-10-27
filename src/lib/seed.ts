@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import type { DB, Land, LandDocument, NearbyPlace, User } from "./types";
 import { ADMIN_EMAIL, ADMIN_PASSWORD } from "./config";
 import { slugify } from "./format";
+import { DEFAULT_SERVICE_SETTINGS, SERVICE_CATEGORIES, seedBusinesses, seedServiceReviews, seedWorkers } from "./services-seed";
 
 const ago = (h: number) => new Date(Date.now() - h * 3600_000).toISOString();
 const img = (n: string) => `/images/${n}.jpg`;
@@ -274,6 +275,12 @@ export function buildSeed(): DB {
       { id: "e1", name: "Vikas More", email: "vikas.more@email.com", phone: "+91 98111 22233", subject: "Borewell Setup", message: "I need borewell installation for my 3 acre land in Daund.", status: "new", createdAt: ago(5) },
     ],
     views: seedViews(lands),
-    counters: { landCode: 9945 },
+    serviceCategories: structuredClone(SERVICE_CATEGORIES),
+    businesses: seedBusinesses(),
+    workers: seedWorkers(),
+    serviceLeads: [],
+    serviceReviews: seedServiceReviews(),
+    serviceSettings: [{ ...DEFAULT_SERVICE_SETTINGS }],
+    counters: { landCode: 9945, servicesSeeded: true },
   };
 }

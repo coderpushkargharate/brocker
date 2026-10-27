@@ -3,16 +3,31 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Bell, ChevronDown, LayoutDashboard, List, LogOut, Menu, Plus, ShieldCheck, User as UserIcon, UserCircle2, X, Bookmark } from "lucide-react";
+import { Bell, ChevronDown, ChevronRight, LayoutDashboard, List, LogOut, Menu, Plus, ShieldCheck, User as UserIcon, UserCircle2, X, Bookmark } from "lucide-react";
 import { Logo } from "./Logo";
 import { Avatar } from "./Avatar";
 import { logoutAction } from "@/app/actions/auth";
 import type { Role } from "@/lib/types";
 
-const NAV = [
+type NavItem = { href: string; label: string; short?: string; children?: { href: string; label: string; desc: string }[] };
+
+const NAV: NavItem[] = [
   { href: "/", label: "Home" },
   { href: "/buy-land", label: "Buy Land" },
   { href: "/sell-land", label: "Sell Land" },
+  {
+    href: "/find-services",
+    label: "Find Services",
+    short: "Services",
+    children: [
+      { href: "/find-services", label: "All Services Near You", desc: "Suppliers, contractors, labour & more" },
+      { href: "/business-services", label: "Business Services", desc: "Building materials, JCB, borewell, garden…" },
+      { href: "/list-business", label: "List Your Business", desc: "Get enquiries from local customers" },
+      { href: "/post-requirement?type=service", label: "Post Requirement", desc: "Get quotes from verified providers" },
+      { href: "/services", label: "Land Services", desc: "Survey, NA conversion, title search" },
+    ],
+  },
+  { href: "/labour", label: "Labour & Workforce", short: "Labour" },
   { href: "/about", label: "About Us" },
   { href: "/contact", label: "Contact" },
 ];
@@ -23,6 +38,7 @@ function activeHref(path: string, role?: Role) {
   if (path === "/") return "/";
   if (path.startsWith("/buy-land") || path.startsWith("/lands") || path.startsWith("/locations") || path.startsWith("/land-type")) return "/buy-land";
   if (path.startsWith("/dashboard")) return role === "investor" ? "/buy-land" : "/sell-land";
+  if (["/find-services", "/business-services", "/list-business", "/post-requirement", "/services"].some((p) => path.startsWith(p))) return "/find-services";
   return NAV.find((n) => n.href !== "/" && path.startsWith(n.href))?.href;
 }
 
@@ -56,17 +72,45 @@ export function HeaderClient({ user, unread }: { user: U; unread: number }) {
       <div className="container-x flex h-[76px] items-center justify-between gap-4 lg:h-[88px]">
         <Logo />
 
-        <nav aria-label="Main" className="hidden h-full items-center gap-8 lg:flex">
+        <nav aria-label="Main" className="hidden h-full items-center gap-5 lg:flex xl:gap-7">
           {NAV.map((n) => {
             const on = active === n.href;
+            const cls = `relative flex h-full items-center gap-1 whitespace-nowrap text-[15px] font-medium transition-colors xl:text-[15.5px] ${on ? "text-brand" : "text-[#374151] hover:text-brand"}`;
+            const label = n.short ? (
+              <>
+                <span className="2xl:hidden">{n.short}</span>
+                <span className="hidden 2xl:inline">{n.label}</span>
+              </>
+            ) : (
+              n.label
+            );
+            if (n.children)
+              return (
+                <div key={n.href} className="group relative flex h-full items-center">
+                  <Link href={n.href} aria-current={on ? "page" : undefined} aria-haspopup="true" className={cls}>
+                    {label} <ChevronDown className="h-4 w-4 transition group-hover:rotate-180" />
+                    {on && <span className="absolute inset-x-0 bottom-0 h-[2px] rounded-full bg-brand" />}
+                  </Link>
+                  <div className="invisible absolute left-1/2 top-full z-50 w-[300px] -translate-x-1/2 pt-1 opacity-0 transition group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+                    <ul className="overflow-hidden rounded-xl border border-line bg-white py-2 shadow-soft">
+                      {n.children.map((c) => (
+                        <li key={c.href}>
+                          <Link href={c.href} className="flex items-center gap-3 px-4 py-2.5 hover:bg-mint-50">
+                            <span className="flex-1">
+                              <b className="block text-[14px] font-semibold text-ink">{c.label}</b>
+                              <span className="text-[12.5px] text-muted">{c.desc}</span>
+                            </span>
+                            <ChevronRight className="h-4 w-4 text-muted" />
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              );
             return (
-              <Link
-                key={n.href}
-                href={n.href}
-                aria-current={on ? "page" : undefined}
-                className={`relative flex h-full items-center text-[15.5px] font-medium transition-colors ${on ? "text-brand" : "text-[#374151] hover:text-brand"}`}
-              >
-                {n.label}
+              <Link key={n.href} href={n.href} aria-current={on ? "page" : undefined} className={cls}>
+                {label}
                 {on && <span className="absolute inset-x-0 bottom-0 h-[2px] rounded-full bg-brand" />}
               </Link>
             );
@@ -150,9 +194,20 @@ export function HeaderClient({ user, unread }: { user: U; unread: number }) {
         <nav aria-label="Mobile" className="border-t border-line bg-white lg:hidden">
           <div className="container-x flex flex-col py-2">
             {NAV.map((n) => (
-              <Link key={n.href} href={n.href} className={`rounded-lg px-3 py-3 text-[15px] font-medium ${active === n.href ? "bg-mint-50 text-brand" : "text-ink"}`}>
-                {n.label}
-              </Link>
+              <div key={n.href}>
+                <Link href={n.href} className={`block rounded-lg px-3 py-3 text-[15px] font-medium ${active === n.href ? "bg-mint-50 text-brand" : "text-ink"}`}>
+                  {n.label}
+                </Link>
+                {n.children && (
+                  <div className="mb-1 ml-3 border-l border-line pl-3">
+                    {n.children.slice(1).map((c) => (
+                      <Link key={c.href} href={c.href} className="block rounded-lg px-3 py-2 text-[14px] text-body hover:text-brand">
+                        {c.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
             {user?.role === "farmer" && (
               <Link href="/dashboard/listings" className={`rounded-lg px-3 py-3 text-[15px] font-medium ${path === "/dashboard/listings" ? "bg-mint-50 text-brand" : "text-ink"}`}>
