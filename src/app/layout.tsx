@@ -1,12 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, Raleway, Kalam } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { site } from "@/lib/config";
 import { JsonLd } from "@/components/JsonLd";
 
-const jakarta = Plus_Jakarta_Sans({ variable: "--font-jakarta", subsets: ["latin"], display: "swap" });
-const raleway = Raleway({ variable: "--font-raleway", subsets: ["latin"], weight: ["500", "600", "700", "800"], display: "swap" });
-const kalam = Kalam({ variable: "--font-kalam", subsets: ["latin"], weight: ["700"], display: "swap" });
+// Fonts are self-hosted so builds don't depend on fetching from Google Fonts.
+const jakarta = localFont({ src: "./fonts/PlusJakartaSans.woff2", weight: "200 800", variable: "--font-jakarta", display: "swap" });
+const raleway = localFont({ src: "./fonts/Raleway.woff2", weight: "500 800", variable: "--font-raleway", display: "swap" });
+const kalam = localFont({ src: "./fonts/Kalam-Bold.woff2", weight: "700", variable: "--font-kalam", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
