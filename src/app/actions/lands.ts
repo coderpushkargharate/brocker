@@ -9,6 +9,10 @@ import { slugify } from "@/lib/format";
 import { DOCUMENT_TYPES } from "@/lib/config";
 import type { DB, DocKey, InterestStatus, Land, LandDocument, LandStatus, NearbyPlace, Notification } from "@/lib/types";
 import type { FormState } from "./auth";
+import { isBot, rateLimit, TOO_MANY } from "@/lib/security";
+import { site } from "@/lib/config";
+
+const SUPPORT_DIGITS = site.supportPhoneHref.replace(/^tel:/, "");
 
 const now = () => new Date().toISOString();
 const str = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
@@ -105,7 +109,8 @@ export async function saveLandAction(_: FormState, fd: FormData): Promise<FormSt
     if (e instanceof UploadError) return { error: e.message };
     throw e;
   }
-  const keptImages = fd.getAll("existingImages").map(String).filter(Boolean);
+  // only photos already on this listing can be kept (prevents pointing a listing at arbitrary URLs)
+  const keptImages = fd.getAll("existingImages").map(String).filter((i) => existing?.images.includes(i));
   const images = [...keptImages, ...newImages];
 
   const documents: LandDocument[] = DOCUMENT_TYPES.map((d) => {
@@ -130,7 +135,8 @@ export async function saveLandAction(_: FormState, fd: FormData): Promise<FormSt
   let verified = existing?.verified ?? false;
   let featured = existing?.featured ?? false;
   if (isAdmin) {
-    status = (str(fd, "status") as LandStatus) || (intent === "draft" ? "draft" : "active");
+    const s = str(fd, "status") as LandStatus;
+    status = (["active", "draft", "pending", "sold", "rejected"] as const).includes(s) ? s : intent === "draft" ? "draft" : "active";
     verified = fd.get("verified") === "on";
     featured = fd.get("featured") === "on";
     if (verified) for (const d of documents) if (d.file) d.status = "verified";
@@ -260,7 +266,8 @@ export async function toggleSaveAction(landId: string): Promise<ToggleResult> {
 export async function expressInterestAction(landId: string, message?: string): Promise<ToggleResult> {
   const user = await getCurrentUser();
   if (!user) return { ok: false, needLogin: true };
-  const l = (await readDB()).lands.find((x) => x.id === landId);
+  if (!(await rateLimit("interest", 20, 60 * 60, user.id))) return { ok: false, message: TOO_MANY };
+  const l = (await readDB()).lands.find((x) => x.id === landId && x.status === "active");
   if (!l) return { ok: false, message: "Land not found." };
   if (l.ownerId === user.id) return { ok: false, message: "This is your own listing." };
   await mutate((db) => {
@@ -277,8 +284,8 @@ export async function expressInterestAction(landId: string, message?: string): P
 export async function logCallAction(landId: string): Promise<{ phone: string }> {
   const user = await getCurrentUser();
   const db = (await readDB());
-  const l = db.lands.find((x) => x.id === landId);
-  if (!l) return { phone: "18001234567" };
+  const l = db.lands.find((x) => x.id === landId && x.status === "active");
+  if (!l || !(await rateLimit("call", 30, 10 * 60))) return { phone: SUPPORT_DIGITS };
   const owner = db.users.find((u) => u.id === l.ownerId);
   await mutate((d) => {
     const land = d.lands.find((x) => x.id === landId)!;
@@ -287,10 +294,11 @@ export async function logCallAction(landId: string): Promise<{ phone: string }> 
     notify(d, { userId: l.ownerId, kind: "call", text: `${user ? user.name : "A visitor"} called you about ${l.title}.`, link: `/dashboard/listings/${l.id}` });
   });
   // Visitors who are not logged in reach AgriLand support, which connects them to the farmer.
-  return { phone: user && owner?.phone ? owner.phone.replace(/[^\d+]/g, "") : "18001234567" };
+  return { phone: user && owner?.phone ? owner.phone.replace(/[^\d+]/g, "") : SUPPORT_DIGITS };
 }
 
 export async function recordViewAction(landId: string) {
+  if (!(await rateLimit("view", 60, 60))) return;
   const viewer = await getCurrentUser();
   await mutate((db) => {
     const l = db.lands.find((x) => x.id === landId);
@@ -307,6 +315,7 @@ export async function recordViewAction(landId: string) {
 }
 
 export async function recordShareAction(landId: string) {
+  if (!(await rateLimit("share", 20, 60))) return;
   await mutate((db) => {
     const l = db.lands.find((x) => x.id === landId);
     if (l) l.stats.shares += 1;
@@ -401,14 +410,17 @@ export async function toggleAlertsAction() {
 }
 
 export async function contactAction(_: FormState, fd: FormData): Promise<FormState> {
-  const name = str(fd, "name");
-  const phone = str(fd, "phone");
+  const name = str(fd, "name").slice(0, 80);
+  const phone = str(fd, "phone").slice(0, 20);
   const message = str(fd, "message");
+  // bots get a normal-looking answer so they don't retry
+  if (isBot(fd)) return { ok: "Thank you! Our team will contact you within 24 hours." };
+  if (!(await rateLimit("contact", 5, 10 * 60))) return { error: TOO_MANY };
   if (name.length < 2) return { error: "Please enter your name." };
   if (!/^[+\d][\d\s-]{8,}$/.test(phone)) return { error: "Please enter a valid mobile number." };
   if (message.length < 5) return { error: "Please write a short message." };
   await mutate((db) => {
-    db.enquiries.push({ id: newId(), name, email: "", phone, subject: str(fd, "subject") || "General", message: message.slice(0, 2000), status: "new", createdAt: now() });
+    db.enquiries.push({ id: newId(), name, email: "", phone, subject: str(fd, "subject").slice(0, 120) || "General", message: message.slice(0, 2000), status: "new", createdAt: now() });
     for (const a of db.users.filter((u) => u.role === "admin")) notify(db, { userId: a.id, kind: "message", text: `New enquiry from ${name}: ${str(fd, "subject") || "General"}`, link: "/admin/enquiries" });
   });
   return { ok: "Thank you! Our team will contact you within 24 hours." };

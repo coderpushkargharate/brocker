@@ -22,7 +22,7 @@ export function LandCard({ land, saved, match, badge = "verified" }: { land: Lan
           <Img src={land.images[0] || FALLBACK_LAND_IMAGE} alt="" fill sizes="(max-width:768px) 100vw, 400px" className="object-cover transition duration-500 group-hover:scale-105" />
         </Link>
         {(badge === "new" || land.verified) && (
-          <span className="chip absolute left-3 top-3 bg-[#16a34a] py-1 text-[12.5px] text-white">
+          <span className="chip absolute left-3 top-3 bg-[#15803d] py-1 text-[12.5px] text-white">
             <CheckCircle2 className="h-4 w-4" /> {badge === "new" ? "NEW" : "VERIFIED"}
           </span>
         )}

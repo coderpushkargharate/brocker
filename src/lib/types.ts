@@ -88,6 +88,8 @@ export interface User {
   bio?: string;
   verified: boolean;
   blocked?: boolean;
+  /** when the user accepted the Terms & Privacy Policy at sign up */
+  termsAcceptedAt?: string;
   saved: string[];
   /** saved business / worker ids */
   savedServices?: string[];
@@ -150,10 +152,63 @@ export interface DB {
   serviceLeads: ServiceLead[];
   serviceReviews: ServiceReview[];
   serviceSettings: ServiceSettings[];
+  posts: BlogPost[];
+  blogCategories: BlogCategory[];
+  auditLog: AuditEntry[];
   counters: { landCode: number; servicesSeeded?: boolean };
 }
 
 export type PublicUser = Omit<User, "passwordHash">;
+
+// ---------- Blog ----------
+
+/** draft = private; published = public once publishedAt is reached (a future date means scheduled). */
+export type PostStatus = "draft" | "published";
+
+export interface BlogPost {
+  id: string;
+  slug: string;
+  /** earlier slugs, so old links keep working (301) after a rename */
+  oldSlugs: string[];
+  title: string;
+  excerpt: string;
+  /** Markdown, rendered with HTML escaped (see lib/markdown.ts) */
+  content: string;
+  status: PostStatus;
+  publishedAt?: string;
+  categoryId?: string;
+  tags: string[];
+  authorName: string;
+  coverImage?: string;
+  coverAlt?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  /** absolute URL, only when the article was first published elsewhere */
+  canonicalUrl?: string;
+  ogImage?: string;
+  noindex?: boolean;
+  /** slugs of hand-picked related posts */
+  related: string[];
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  updatedBy: string;
+}
+
+export interface BlogCategory {
+  id: string; // slug, used in URLs
+  name: string;
+  description: string;
+}
+
+export interface AuditEntry {
+  id: string;
+  at: string;
+  userId: string;
+  userName: string;
+  action: string;
+  target: string;
+}
 
 // ---------- Business Services & Labour ----------
 

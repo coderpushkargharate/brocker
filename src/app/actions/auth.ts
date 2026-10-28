@@ -4,7 +4,11 @@ import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { mutate, newId, readDB } from "@/lib/db";
 import { dashboardPath, endSession, startSession } from "@/lib/auth";
+import { isBot, rateLimit, TOO_MANY } from "@/lib/security";
+import { MissingSecretError } from "@/lib/session";
 import type { Role, User } from "@/lib/types";
+
+const MIN_PASSWORD = 8;
 
 export type FormState = { error?: string; ok?: string } | undefined;
 
@@ -20,6 +24,8 @@ export async function loginAction(_: FormState, fd: FormData): Promise<FormState
   const login = String(fd.get("login") || fd.get("email") || "").trim().toLowerCase();
   const password = String(fd.get("password") || "");
   if (!login || !password) return { error: "Please enter your mobile number and password." };
+  // slow down password guessing: per address and per account
+  if (!(await rateLimit("login", 20, 15 * 60)) || !(await rateLimit("login-id", 8, 15 * 60, login))) return { error: TOO_MANY };
 
   const users = (await readDB()).users;
   const user = login.includes("@")
@@ -30,7 +36,12 @@ export async function loginAction(_: FormState, fd: FormData): Promise<FormState
   if (!user || !(await bcrypt.compare(password, user.passwordHash))) return { error: "Invalid mobile number or password." };
   if (user.blocked) return { error: "Your account has been blocked. Please contact support." };
 
-  await startSession(user);
+  try {
+    await startSession(user);
+  } catch (e) {
+    if (e instanceof MissingSecretError) return { error: "Login is temporarily unavailable (server configuration). Please contact support." };
+    throw e;
+  }
   const fallback = dashboardPath(user.role);
   let next = safeNext(fd.get("next"), fallback);
   if (next.startsWith("/admin") && user.role !== "admin") next = fallback;
@@ -44,9 +55,13 @@ export async function signupAction(_: FormState, fd: FormData): Promise<FormStat
   const role = (String(fd.get("role") || "investor") === "farmer" ? "farmer" : "investor") as Role;
   const district = String(fd.get("district") || "").trim();
 
-  if (name.length < 2) return { error: "Please enter your full name." };
+  if (isBot(fd)) redirect("/");
+  if (!(await rateLimit("signup", 5, 60 * 60))) return { error: TOO_MANY };
+  if (name.length < 2 || name.length > 80) return { error: "Please enter your full name." };
   if (!/^[+\d][\d\s-]{8,}$/.test(phone) || phoneKey(phone).length !== 10) return { error: "Please enter a valid 10-digit mobile number." };
-  if (password.length < 6) return { error: "Password must be at least 6 characters." };
+  if (password.length < MIN_PASSWORD) return { error: `Password must be at least ${MIN_PASSWORD} characters.` };
+  if (password.length > 200) return { error: "Password is too long." };
+  if (fd.get("agree") !== "on") return { error: "Please accept the Terms & Conditions and Privacy Policy to create an account." };
   if ((await readDB()).users.some((u) => u.phone && phoneKey(u.phone) === phoneKey(phone))) return { error: "An account with this mobile number already exists. Please log in." };
 
   const user: User = {
@@ -59,6 +74,7 @@ export async function signupAction(_: FormState, fd: FormData): Promise<FormStat
     state: "Maharashtra",
     passwordHash: await bcrypt.hash(password, 10),
     verified: false,
+    termsAcceptedAt: new Date().toISOString(),
     saved: [],
     profileViews: 0,
     createdAt: new Date().toISOString(),
@@ -81,7 +97,12 @@ export async function signupAction(_: FormState, fd: FormData): Promise<FormStat
       }
     }
   });
-  await startSession(user);
+  try {
+    await startSession(user);
+  } catch (e) {
+    if (e instanceof MissingSecretError) redirect("/login");
+    throw e;
+  }
   redirect(safeNext(fd.get("next"), "/dashboard"));
 }
 

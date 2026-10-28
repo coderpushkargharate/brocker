@@ -23,7 +23,7 @@ export function Field({
 }) {
   const current = options.find((o) => o.value === value)?.label ?? options[0]?.label;
   return (
-    <label className={`relative flex min-w-0 flex-1 items-center gap-3 px-4 py-3 ${last ? "" : "border-b border-line md:border-b-0 md:border-r"}`}>
+    <label className={`relative flex min-w-0 flex-1 items-center gap-3 px-4 py-3 ${last ? "" : "border-b border-line xl:border-b-0 xl:border-r"}`}>
       <span className="icon-tile h-11 w-11 shrink-0 text-leaf">{icon}</span>
       <span className="min-w-0 flex-1">
         <span className="block text-[13px] text-muted">{label}</span>
@@ -58,8 +58,8 @@ export function SearchBar({
   const talukas = district ? SUB_DISTRICTS[district] ?? [] : [];
 
   return (
-    <form action="/buy-land" method="get" role="search" className={`flex flex-col rounded-2xl border border-line bg-white shadow-soft md:flex-row md:items-center md:py-3 md:pr-4 ${className}`}>
-      <div className="flex flex-1 flex-col md:flex-row md:items-center">
+    <form action="/buy-land" method="get" role="search" className={`flex flex-col rounded-2xl border border-line bg-white shadow-soft xl:flex-row xl:items-center xl:py-3 xl:pr-4 ${className}`}>
+      <div className="grid flex-1 md:grid-cols-2 xl:flex xl:flex-row xl:items-center">
         <Field
           icon={<MapPin className="h-5 w-5" />}
           label="District"
@@ -97,8 +97,8 @@ export function SearchBar({
           options={[{ value: "", label: "Any Budget" }, ...BUDGETS.map((b) => ({ value: `${b.min}-${b.max}`, label: b.label }))]}
         />
       </div>
-      <div className="p-4 md:p-0 md:pl-4">
-        <button className="btn btn-leaf h-12 w-full rounded-lg px-8 text-[16px] font-medium md:w-[180px]">
+      <div className="p-4 xl:p-0 xl:pl-4">
+        <button type="submit" className="btn btn-leaf h-12 w-full rounded-lg px-8 text-[16px] font-medium xl:w-[180px]">
           <Search className="h-5 w-5" /> Search Land
         </button>
       </div>

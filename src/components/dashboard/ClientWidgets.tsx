@@ -1,5 +1,6 @@
 "use client";
 
+import { keepValues } from "@/lib/forms";
 import Link from "next/link";
 import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -143,20 +144,20 @@ export function PreferencesForm({ prefs }: { prefs: Preferences }) {
   const areaOpts = AREAS.map((a) => ({ value: `${a.min}-${a.max}`, label: a.label }));
   if (!areaOpts.some((o) => o.value === area)) areaOpts.unshift({ value: area, label: "Custom area" });
   return (
-    <form action={action}>
+    <form onSubmit={keepValues(action)}>
       <input type="hidden" name="alerts" value={prefs.alerts ? "on" : ""} />
-      <div className="flex flex-col md:flex-row md:items-center">
-        <div className="flex flex-1 flex-col md:flex-row md:items-center">
+      <div className="flex flex-col xl:flex-row xl:items-center">
+        <div className="grid flex-1 md:grid-cols-2 xl:flex xl:flex-row xl:items-center">
           <Field icon={<MapPin className="h-5 w-5" />} label="Location" name="district" value={district} onChange={setDistrict} options={[{ value: "", label: "Any Location" }, ...DISTRICTS.map((d) => ({ value: d, label: `${d}, Maharashtra` }))]} />
           <Field icon={<IndianRupee className="h-5 w-5" />} label="Budget" name="budget" value={budget} onChange={setBudget} options={budgetOpts} />
           <Field icon={<SquareDashed className="h-5 w-5" />} label="Land Area" name="area" value={area} onChange={setArea} options={areaOpts} />
           <Field icon={<Sprout className="h-5 w-5" />} label="Land Type" name="landType" value={type} onChange={setType} last options={PROPERTY_TYPES.map((t) => ({ value: t, label: t }))} />
         </div>
-        <div className="flex gap-2 p-4 md:p-0 md:pl-4">
+        <div className="flex gap-2 p-4 xl:p-0 xl:pl-4">
           <button type="submit" name="search" value="0" disabled={pending} className="btn btn-ghost h-12 px-4 text-[14px]">
             Save
           </button>
-          <button type="submit" name="search" value="1" disabled={pending} className="btn btn-leaf h-12 flex-1 px-7 text-[15.5px] font-medium md:w-[170px]">
+          <button type="submit" name="search" value="1" disabled={pending} className="btn btn-leaf h-12 flex-1 px-7 text-[15.5px] font-medium xl:w-[170px]">
             <Search className="h-5 w-5" /> Search Land
           </button>
         </div>

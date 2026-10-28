@@ -1,6 +1,6 @@
 export const site = {
   name: "AgriLand",
-  tagline: "Trusted Agriculture Land Marketplace",
+  tagline: "Agricultural Land Marketplace",
   description:
     "A trusted marketplace connecting agricultural landowners with genuine investors through secure, transparent, and profitable land deals across Maharashtra and India.",
   // your real domain; on Vercel it falls back to the project's production domain automatically
@@ -10,20 +10,37 @@ export const site = {
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "") ||
     "http://localhost:3000"
   ).replace(/\/$/, ""),
-  supportPhone: "1800-123-4567",
-  supportPhoneHref: "tel:18001234567",
-  whatsapp: "https://wa.me/918001234567",
-  email: "support@agriland.in",
-  social: {
-    instagram: "https://instagram.com/",
-    facebook: "https://facebook.com/",
-    linkedin: "https://linkedin.com/",
-    youtube: "https://youtube.com/",
+  // Contact details come from env vars so the real numbers can be set per deployment.
+  // The fallbacks are the values the site shipped with; replace them before running ads (see ADS_COMPLIANCE_CHECKLIST.md).
+  supportPhone: env("NEXT_PUBLIC_SUPPORT_PHONE") || "1800-123-4567",
+  supportPhoneHref: `tel:${(env("NEXT_PUBLIC_SUPPORT_PHONE") || "18001234567").replace(/[^d+]/g, "")}`,
+  whatsapp: env("NEXT_PUBLIC_WHATSAPP_URL") || "https://wa.me/918001234567",
+  email: env("NEXT_PUBLIC_SUPPORT_EMAIL") || "support@agriland.in",
+  /** true only when the deployment has set its real phone number */
+  contactConfigured: Boolean(env("NEXT_PUBLIC_SUPPORT_PHONE")),
+  /** profile links; icons are hidden for networks that are not configured */
+  social: Object.fromEntries(
+    (["instagram", "facebook", "linkedin", "youtube"] as const).map((k) => [k, env(`NEXT_PUBLIC_SOCIAL_${k.toUpperCase()}`)]).filter(([, v]) => v),
+  ) as Partial<Record<"instagram" | "facebook" | "linkedin" | "youtube", string>>,
+  /** legal operator details shown on the legal pages; never invented, so they stay empty until configured */
+  legal: {
+    name: env("NEXT_PUBLIC_LEGAL_NAME"),
+    address: env("NEXT_PUBLIC_BUSINESS_ADDRESS"),
+    city: env("NEXT_PUBLIC_BUSINESS_CITY") || "Pune, Maharashtra",
+    gstin: env("NEXT_PUBLIC_GSTIN"),
+    reraAgentNo: env("NEXT_PUBLIC_RERA_AGENT_NO"),
+    grievanceOfficer: env("NEXT_PUBLIC_GRIEVANCE_OFFICER"),
+    lastUpdated: "27 October 2026",
   },
 };
 
+function env(k: string) {
+  return (process.env[k] || "").trim();
+}
+
 export const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "pushkargharate3011@gmail.com").toLowerCase();
-export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "pushkar3011";
+/** Used only when a new, empty database is first created. Empty = the admin gets a random password (see seed). */
+export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
 
 export const DISTRICTS = [
   "Pune",

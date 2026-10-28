@@ -1,10 +1,12 @@
 "use client";
 
+import { keepValues } from "@/lib/forms";
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { Eye, EyeOff, Loader2, Sprout, TrendingUp } from "lucide-react";
 import { loginAction, signupAction } from "@/app/actions/auth";
 import { DISTRICTS } from "@/lib/config";
+import { Honeypot } from "@/components/FormGuard";
 
 function Password({ name = "password", label = "Password", autoComplete }: { name?: string; label?: string; autoComplete: string }) {
   const [show, setShow] = useState(false);
@@ -14,7 +16,7 @@ function Password({ name = "password", label = "Password", autoComplete }: { nam
         {label}
       </label>
       <div className="relative">
-        <input id={name} name={name} type={show ? "text" : "password"} required minLength={autoComplete === "new-password" ? 6 : undefined} autoComplete={autoComplete} className="input pr-11" />
+        <input id={name} name={name} type={show ? "text" : "password"} required minLength={autoComplete === "new-password" ? 8 : undefined} autoComplete={autoComplete} className="input pr-11" />
         <button type="button" onClick={() => setShow((s) => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted" aria-label={show ? "Hide password" : "Show password"}>
           {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
         </button>
@@ -32,7 +34,7 @@ export function Alert({ error, ok }: { error?: string; ok?: string }) {
 export function LoginForm({ next }: { next?: string }) {
   const [state, action, pending] = useActionState(loginAction, undefined);
   return (
-    <form action={action} className="space-y-4">
+    <form onSubmit={keepValues(action)} className="space-y-4">
       <input type="hidden" name="next" value={next ?? ""} />
       <Alert error={state?.error} />
       <div>
@@ -42,6 +44,11 @@ export function LoginForm({ next }: { next?: string }) {
         <input id="login" name="login" type="text" required autoComplete="username" className="input" placeholder="98765 43210" />
       </div>
       <Password autoComplete="current-password" />
+      <p className="-mt-1 text-right text-[13.5px]">
+        <Link href="/forgot-password" className="link">
+          Forgot password?
+        </Link>
+      </p>
       <button type="submit" disabled={pending} className="btn btn-primary h-12 w-full text-[15px]">
         {pending && <Loader2 className="h-4 w-4 animate-spin" />} Log in
       </button>
@@ -63,7 +70,7 @@ export function SignupForm({ next, defaultRole }: { next?: string; defaultRole?:
     { v: "farmer", t: "I want to Sell", d: "List my land as a farmer", icon: Sprout },
   ];
   return (
-    <form action={action} className="space-y-4">
+    <form onSubmit={keepValues(action)} className="space-y-4">
       <input type="hidden" name="next" value={next ?? ""} />
       <input type="hidden" name="role" value={role} />
       <Alert error={state?.error} />
@@ -106,6 +113,22 @@ export function SignupForm({ next, defaultRole }: { next?: string; defaultRole?:
         </select>
       </div>
       <Password autoComplete="new-password" />
+      <p className="-mt-2 text-[12.5px] text-muted">At least 8 characters.</p>
+      <Honeypot />
+      <label className="flex items-start gap-2.5 text-[13.5px] leading-snug text-body">
+        <input type="checkbox" name="agree" required className="check mt-0.5 shrink-0" />
+        <span>
+          I agree to the{" "}
+          <Link href="/terms" className="link" target="_blank">
+            Terms &amp; Conditions
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy-policy" className="link" target="_blank">
+            Privacy Policy
+          </Link>
+          .
+        </span>
+      </label>
       <button type="submit" disabled={pending} className="btn btn-primary h-12 w-full text-[15px]">
         {pending && <Loader2 className="h-4 w-4 animate-spin" />} Create Account
       </button>

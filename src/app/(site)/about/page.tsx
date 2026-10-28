@@ -8,7 +8,7 @@ import { publicLands } from "@/lib/lands";
 import { readDB } from "@/lib/db";
 
 export const metadata: Metadata = {
-  title: "About Us – Trusted Agriculture Land Marketplace",
+  title: "About Us – Agricultural Land Marketplace in Maharashtra",
   description: "AgriLand connects genuine agricultural landowners with verified investors through secure, transparent and profitable land deals. Learn about our mission and verification process.",
   alternates: { canonical: "/about" },
 };

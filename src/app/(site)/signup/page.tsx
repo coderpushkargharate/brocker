@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Create a Free Account",
   description: "Join AgriLand free to sell your agricultural land, or to buy verified farm land across Maharashtra.",
   alternates: { canonical: "/signup" },
+  robots: { index: false, follow: true },
 };
 
 export default async function SignupPage({ searchParams }: { searchParams: Promise<{ next?: string; role?: string }> }) {

@@ -1,5 +1,6 @@
 "use client";
 
+import { keepValues } from "@/lib/forms";
 import Link from "next/link";
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -28,6 +29,7 @@ import { BUSINESS_HIGHLIGHTS, BUSINESS_TYPES, EMPLOYEE_OPTIONS, PAYMENT_MODES, t
 import { CatIcon } from "./icons";
 import { WhatsAppIcon } from "./Actions";
 import type { Business, ServiceCategory } from "@/lib/types";
+import { Honeypot } from "@/components/FormGuard";
 
 const DRAFT_KEY = "agri-business-draft";
 
@@ -236,7 +238,8 @@ export function BusinessForm({
       )}
 
       {/* middle: the form */}
-      <form key={formKey} ref={formRef} action={action} onChange={onChange} className="min-w-0 space-y-5">
+      <form key={formKey} ref={formRef} onSubmit={keepValues(action)} onChange={onChange} className="relative min-w-0 space-y-5">
+        {!admin && <Honeypot />}
         {!admin && <ListBusinessHeader loggedIn={loggedIn} />}
         {initial && <input type="hidden" name="id" value={initial.id} />}
         <div id="form-alert">
@@ -543,13 +546,13 @@ export function BusinessForm({
             <span className="text-[12px] text-muted">Select multiple photos (up to 20)</span>
             <input type="file" name="images" accept="image/*" multiple className="sr-only" onChange={(e) => setNewPhotos(e.target.files?.length ?? 0)} />
           </label>
-          <label className="mt-4 flex cursor-pointer items-center gap-3 rounded-xl border border-line p-4 hover:border-brand">
+          <label className="mt-4 flex cursor-pointer flex-wrap items-center gap-3 rounded-xl border border-line p-4 hover:border-brand">
             <FileUp className="h-6 w-6 text-brand" />
             <span className="flex-1">
               <b className="block text-[14px] text-ink">Business Documents <span className="font-normal text-muted">(Optional)</span></b>
               <span className="text-[12px] text-muted">GST certificate, Shop Act, Udyam – PDF or image. Only our team can see these.</span>
             </span>
-            <input type="file" name="documents" accept="image/*,application/pdf" multiple className="max-w-[200px] text-[12px]" />
+            <input type="file" name="documents" accept="image/*,application/pdf" multiple className="w-full min-w-0 max-w-[200px] text-[12px]" />
           </label>
         </Card>
 

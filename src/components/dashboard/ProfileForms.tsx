@@ -1,5 +1,6 @@
 "use client";
 
+import { keepValues, useResetOnSuccess } from "@/lib/forms";
 import { useActionState, useState } from "react";
 import { Camera, Loader2 } from "lucide-react";
 import { updateProfileAction } from "@/app/actions/lands";
@@ -21,7 +22,7 @@ export function ProfileForm({ user }: { user: PublicUser }) {
     </div>
   );
   return (
-    <form action={action} className="space-y-5">
+    <form onSubmit={keepValues(action)} className="space-y-5">
       <Alert error={state?.error} ok={state?.ok} />
       <div className="flex items-center gap-5">
         <label className="relative block h-24 w-24 cursor-pointer overflow-hidden rounded-full bg-mint ring-4 ring-mint">
@@ -99,8 +100,9 @@ export function ProfileForm({ user }: { user: PublicUser }) {
 
 export function PasswordForm() {
   const [state, action, pending] = useActionState(changePasswordAction, undefined);
+  const ref = useResetOnSuccess(state);
   return (
-    <form action={action} className="space-y-4">
+    <form ref={ref} onSubmit={keepValues(action)} className="space-y-4">
       <Alert error={state?.error} ok={state?.ok} />
       <div>
         <label className="label" htmlFor="current">
@@ -112,7 +114,7 @@ export function PasswordForm() {
         <label className="label" htmlFor="password">
           New password
         </label>
-        <input id="password" name="password" type="password" required minLength={6} autoComplete="new-password" className="input" />
+        <input id="password" name="password" type="password" required minLength={8} autoComplete="new-password" className="input" />
       </div>
       <button disabled={pending} className="btn btn-ghost h-11 px-6">
         Change Password

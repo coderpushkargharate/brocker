@@ -18,7 +18,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           leads: db.serviceLeads.filter((l) => l.status === "new").length,
           reviews: db.serviceReviews.filter((r) => r.status === "pending").length,
         }} />
-      <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+      <main id="main" className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
     </div>
   );
 }

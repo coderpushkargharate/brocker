@@ -12,7 +12,7 @@ function pagesToShow(page: number, pages: number) {
   return out;
 }
 
-export function Pagination({ page, pages, total, pageSize, hrefFor }: { page: number; pages: number; total: number; pageSize: number; hrefFor: (p: number) => string }) {
+export function Pagination({ page, pages, total, pageSize, hrefFor, noun = "lands" }: { page: number; pages: number; total: number; pageSize: number; hrefFor: (p: number) => string; noun?: string }) {
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(total, page * pageSize);
   const box = "flex h-9 min-w-9 items-center justify-center rounded-md border border-line bg-white px-2 text-[14px] text-ink";
@@ -50,7 +50,7 @@ export function Pagination({ page, pages, total, pageSize, hrefFor }: { page: nu
         )}
       </div>
       <p className="text-[14.5px] text-muted">
-        Showing {from} – {to} of {total} lands
+        Showing {from} – {to} of {total} {noun}
       </p>
     </nav>
   );

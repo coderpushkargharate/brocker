@@ -1,5 +1,6 @@
 "use client";
 
+import { keepValues } from "@/lib/forms";
 import { useActionState, useRef, useState } from "react";
 import { CircleCheck, Loader2, Phone, Send, Star } from "lucide-react";
 import { serviceLeadAction, submitServiceReviewAction } from "@/app/actions/services";
@@ -8,6 +9,8 @@ import { DISTRICTS, SUB_DISTRICTS } from "@/lib/config";
 import { waLink } from "@/lib/services-config";
 import { WhatsAppIcon } from "./Actions";
 import type { ServiceCategory } from "@/lib/types";
+import { Honeypot, PrivacyNote } from "@/components/FormGuard";
+import { useLeadTracked } from "@/components/Consent";
 
 type Target = { type: "business" | "worker"; id: string; name: string; phone: string; whatsapp?: string };
 
@@ -17,6 +20,7 @@ export function EnquiryForm({ target, items, itemLabel = "Select Material", defa
   const [district, setDistrict] = useState(defaultDistrict);
   const kindRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  useLeadTracked(state?.ok, `${target.type}_enquiry`);
 
   const sendWhatsApp = () => {
     const f = formRef.current;
@@ -40,7 +44,7 @@ export function EnquiryForm({ target, items, itemLabel = "Select Material", defa
     );
 
   return (
-    <form ref={formRef} action={action} className="space-y-3">
+    <form ref={formRef} onSubmit={keepValues(action)} className="space-y-3">
       <input type="hidden" name="targetType" value={target.type} />
       <input type="hidden" name="targetId" value={target.id} />
       <input ref={kindRef} type="hidden" name="kind" defaultValue="callback" />
@@ -100,6 +104,8 @@ export function EnquiryForm({ target, items, itemLabel = "Select Material", defa
         </label>
         <textarea id="eq-msg" name="message" rows={3} className="input bg-white" placeholder={target.type === "business" ? "Tell us your requirement (e.g. Cement 50 bags, Steel 1 ton...)" : "Tell us about the work (e.g. compound wall, 10 days)"} />
       </div>
+      <Honeypot />
+      <PrivacyNote shared />
       <button type="button" onClick={sendWhatsApp} disabled={pending} className="btn h-12 w-full bg-[#15803d] text-[15px] text-white hover:bg-[#166534]">
         {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <WhatsAppIcon className="h-5 w-5" />} Send Enquiry on WhatsApp
       </button>
@@ -124,7 +130,7 @@ export function ReviewForm({ targetType, targetId }: { targetType: "business" | 
   const [hover, setHover] = useState(0);
   if (state?.ok) return <Alert ok={state.ok} />;
   return (
-    <form action={action} className="space-y-3 rounded-xl border border-line bg-[#f9fafb] p-4">
+    <form onSubmit={keepValues(action)} className="space-y-3 rounded-xl border border-line bg-[#f9fafb] p-4">
       <input type="hidden" name="targetType" value={targetType} />
       <input type="hidden" name="targetId" value={targetId} />
       <input type="hidden" name="rating" value={rating} />
@@ -133,7 +139,7 @@ export function ReviewForm({ targetType, targetId }: { targetType: "business" | 
         <span className="label">Your Rating</span>
         <div className="flex gap-1" onMouseLeave={() => setHover(0)}>
           {[1, 2, 3, 4, 5].map((n) => (
-            <button key={n} type="button" aria-label={`${n} star${n > 1 ? "s" : ""}`} onMouseEnter={() => setHover(n)} onClick={() => setRating(n)}>
+            <button key={n} type="button" aria-label={`${n} star${n > 1 ? "s" : ""}`} aria-pressed={rating >= n} onMouseEnter={() => setHover(n)} onClick={() => setRating(n)} className="flex h-11 w-11 items-center justify-center">
               <Star className={`h-7 w-7 ${(hover || rating) >= n ? "fill-[#f5a623] text-[#f5a623]" : "text-[#d1d5db]"}`} />
             </button>
           ))}
@@ -151,7 +157,9 @@ export function ReviewForm({ targetType, targetId }: { targetType: "business" | 
         </label>
         <textarea id="rv-text" name="text" rows={3} required className="input bg-white" placeholder="How was the service, quality and delivery?" />
       </div>
-      <button disabled={pending} className="btn btn-primary h-11 px-6 text-[14px]">
+      <Honeypot />
+      <p className="text-[12px] text-muted">Your name and review will be shown publicly after a quick check.</p>
+      <button type="submit" disabled={pending} className="btn btn-primary h-11 px-6 text-[14px]">
         {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />} Submit Review
       </button>
     </form>
@@ -166,6 +174,7 @@ export function RequirementForm({ categories, defaultType, defaultCategory }: { 
   const [cat, setCat] = useState(defaultCategory && shown.some((c) => c.id === defaultCategory) ? defaultCategory : shown[0]?.id ?? "");
   const [district, setDistrict] = useState("Pune");
   const current = categories.find((c) => c.id === cat);
+  useLeadTracked(state?.ok, "requirement");
 
   if (state?.ok)
     return (
@@ -177,7 +186,7 @@ export function RequirementForm({ categories, defaultType, defaultCategory }: { 
     );
 
   return (
-    <form action={action} className="space-y-4">
+    <form onSubmit={keepValues(action)} className="space-y-4">
       <input type="hidden" name="kind" value="requirement" />
       <Alert error={state?.error} />
       <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label="What do you need">
@@ -295,7 +304,9 @@ export function RequirementForm({ categories, defaultType, defaultCategory }: { 
           <input id="rq-phone" name="phone" type="tel" required className="input" autoComplete="tel" placeholder="+91 98765 43210" />
         </div>
       </div>
-      <button disabled={pending} className="btn btn-primary h-12 w-full text-[16px]">
+      <Honeypot />
+      <PrivacyNote shared />
+      <button type="submit" disabled={pending} className="btn btn-primary h-12 w-full text-[16px]">
         {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />} Post Requirement
       </button>
     </form>

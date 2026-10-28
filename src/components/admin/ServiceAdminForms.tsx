@@ -1,5 +1,6 @@
 "use client";
 
+import { keepValues, useResetOnSuccess } from "@/lib/forms";
 import { useActionState } from "react";
 import { Loader2, Save } from "lucide-react";
 import { saveCategoryAction, saveServiceSettingsAction } from "@/app/actions/services-admin";
@@ -10,8 +11,9 @@ import type { ServiceCategory, ServiceKind, ServiceSettings } from "@/lib/types"
 export function CategoryForm({ cat, kind }: { cat?: ServiceCategory; kind: ServiceKind }) {
   const [state, action, pending] = useActionState(saveCategoryAction, undefined);
   const id = cat?.id ?? `new-${kind}`;
+  const ref = useResetOnSuccess(state, !cat);
   return (
-    <form action={action} className="space-y-3">
+    <form ref={ref} onSubmit={keepValues(action)} className="space-y-3">
       {cat && <input type="hidden" name="id" value={cat.id} />}
       <input type="hidden" name="kind" value={kind} />
       <Alert error={state?.error} ok={state?.ok} />
@@ -91,7 +93,7 @@ export function ServiceSettingsForm({ s }: { s: ServiceSettings }) {
     </div>
   );
   return (
-    <form action={action} className="space-y-6">
+    <form onSubmit={keepValues(action)} className="space-y-6">
       <Alert error={state?.error} ok={state?.ok} />
       <section>
         <h2 className="text-[17px] font-semibold text-ink">Business Services page – stats box</h2>

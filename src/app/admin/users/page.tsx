@@ -7,6 +7,7 @@ import { deleteUserAction, toggleBlockUserAction, toggleVerifyUserAction } from 
 import { Box, PageTitle } from "@/components/admin/Bits";
 import { ConfirmButton } from "@/components/admin/AdminNav";
 import { CreateUserForm } from "@/components/admin/CreateUserForm";
+import { ResetPasswordButton } from "@/components/admin/ResetPassword";
 import { Avatar } from "@/components/Avatar";
 
 export const metadata = { title: "Users" };
@@ -92,6 +93,7 @@ export default async function AdminUsers({ searchParams }: { searchParams: Promi
                                 <Ban className="h-3.5 w-3.5" /> {u.blocked ? "Unblock" : "Block"}
                               </button>
                             </form>
+                            <ResetPasswordButton id={u.id} name={u.name} />
                             <form action={deleteUserAction.bind(null, u.id)}>
                               <ConfirmButton message={`Delete ${u.name}? Their lands and interests will also be removed.`} className="rounded-md border border-line p-1 text-[#dc2626] hover:bg-[#fef2f2]">
                                 <Trash2 className="h-4 w-4" />

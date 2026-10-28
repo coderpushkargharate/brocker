@@ -83,20 +83,51 @@ function seedViews(lands: Land[]) {
   return out;
 }
 
+/**
+ * Demo listings, users and reviews are sample content for development and demos only.
+ * They are never loaded into a new production database unless SEED_DEMO_DATA=true is set explicitly,
+ * because publishing invented listings and reviews would mislead visitors.
+ */
+export const DEMO_DATA_ENABLED = process.env.SEED_DEMO_DATA ? process.env.SEED_DEMO_DATA === "true" : process.env.NODE_ENV !== "production";
+
+function adminPassword() {
+  if (ADMIN_PASSWORD) return ADMIN_PASSWORD;
+  // no password configured: create the admin with an unguessable one; set ADMIN_PASSWORD before first run to choose it
+  console.warn("[seed] ADMIN_PASSWORD is not set – the admin account was created with a random password. Set ADMIN_PASSWORD and recreate the admin, or reset it from another admin account.");
+  return crypto.randomUUID() + crypto.randomUUID();
+}
+
+function adminUser() {
+  return user({ id: "u-admin", name: "Admin", email: ADMIN_EMAIL, role: "admin", phone: "", district: "Pune", state: "Maharashtra" }, adminPassword());
+}
+
+/** First data for an empty database. */
 export function buildSeed(): DB {
+  if (DEMO_DATA_ENABLED) return buildDemoSeed();
+  return {
+    users: [adminUser()],
+    lands: [],
+    interests: [],
+    notifications: [],
+    calls: [],
+    enquiries: [],
+    views: [],
+    serviceCategories: structuredClone(SERVICE_CATEGORIES),
+    businesses: [],
+    workers: [],
+    serviceLeads: [],
+    serviceReviews: [],
+    serviceSettings: [{ ...DEFAULT_SERVICE_SETTINGS }],
+    posts: [],
+    blogCategories: [],
+    auditLog: [],
+    counters: { landCode: 9900, servicesSeeded: true },
+  };
+}
+
+function buildDemoSeed(): DB {
   const users: User[] = [
-    user(
-      {
-        id: "u-admin",
-        name: "Pushkar Gharate",
-        email: ADMIN_EMAIL,
-        role: "admin",
-        phone: "+91 90000 00000",
-        district: "Pune",
-        state: "Maharashtra",
-      },
-      ADMIN_PASSWORD,
-    ),
+    adminUser(),
     user(
       {
         id: "u-rajesh",
@@ -281,6 +312,9 @@ export function buildSeed(): DB {
     serviceLeads: [],
     serviceReviews: seedServiceReviews(),
     serviceSettings: [{ ...DEFAULT_SERVICE_SETTINGS }],
+    posts: [],
+    blogCategories: [],
+    auditLog: [],
     counters: { landCode: 9945, servicesSeeded: true },
   };
 }

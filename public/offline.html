@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en-IN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#167208" />
+    <title>You're offline | AgriLand</title>
+    <!-- Served by the service worker when there is no connection. Must not depend on any other file except the cached icon. -->
+    <style>
+      html, body { margin: 0; height: 100%; }
+      body {
+        display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+        padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+        box-sizing: border-box; background: #f4faf5; color: #0b1229;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      }
+      img { border-radius: 16px; }
+      h1 { margin: 24px 0 8px; font-size: 26px; }
+      p { margin: 0; max-width: 360px; font-size: 15px; line-height: 1.6; color: #4b5563; }
+      button {
+        margin-top: 24px; min-height: 44px; padding: 0 24px; border: 0; border-radius: 8px;
+        background: #167208; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;
+      }
+      button:focus-visible { outline: 2px solid #0b1229; outline-offset: 2px; }
+    </style>
+  </head>
+  <body>
+    <img src="/icons/icon-192.png" alt="AgriLand" width="72" height="72" />
+    <h1>You're offline</h1>
+    <p>Land listings and enquiries need an internet connection. Check your mobile data or Wi-Fi and try again.</p>
+    <button type="button" onclick="location.reload()">Try again</button>
+    <script>
+      // come back automatically when the connection returns
+      window.addEventListener("online", function () { location.reload(); });
+    </script>
+  </body>
+</html>

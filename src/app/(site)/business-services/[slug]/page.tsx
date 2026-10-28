@@ -67,7 +67,10 @@ export default async function BusinessPage({ params }: Props) {
   if (!r) notFound();
   const { b, db, user } = r;
   const cat = categoryById(db, b.categoryId);
-  const reviews = db.serviceReviews.filter((x) => x.targetId === b.id && x.status === "approved").sort((x, y) => +new Date(y.createdAt) - +new Date(x.createdAt)).slice(0, 6);
+  const approved = db.serviceReviews.filter((x) => x.targetId === b.id && x.status === "approved");
+  const approvedCount = approved.length;
+  const approvedAvg = approvedCount ? approved.reduce((s, r) => s + r.rating, 0) / approvedCount : 0;
+  const reviews = [...approved].sort((x, y) => +new Date(y.createdAt) - +new Date(x.createdAt)).slice(0, 6);
   const saved = (user?.savedServices ?? []).includes(b.id);
   const t = { type: "business" as const, id: b.id, phone: b.phone, whatsapp: b.whatsapp, name: b.name };
   const photos = [...new Set([...b.images, ...b.services.map((s) => s.image).filter(Boolean)])] as string[];
@@ -119,7 +122,8 @@ export default async function BusinessPage({ params }: Props) {
           image: photos.slice(0, 5).map((i) => (i.startsWith("http") ? i : site.url + i)),
           telephone: b.phone,
           address: { "@type": "PostalAddress", streetAddress: b.address, addressLocality: b.area, addressRegion: b.state, postalCode: b.pincode, addressCountry: "IN" },
-          ...(b.reviewCount ? { aggregateRating: { "@type": "AggregateRating", ratingValue: b.rating, reviewCount: b.reviewCount } } : {}),
+          // rating markup only from approved reviews stored on this site (stored totals can be admin-edited)
+          ...(approvedCount ? { aggregateRating: { "@type": "AggregateRating", ratingValue: +approvedAvg.toFixed(1), reviewCount: approvedCount, bestRating: 5, worstRating: 1 } } : {}),
         }}
       />
       {b.status !== "active" && <p className="bg-[#fef3c7] py-2 text-center text-[13.5px] font-medium text-[#92400e]">Admin preview – this listing is {b.status} and not visible to visitors.</p>}

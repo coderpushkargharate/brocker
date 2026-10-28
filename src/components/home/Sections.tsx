@@ -288,7 +288,7 @@ export function LandTypes() {
         {LAND_CATEGORIES.map((c) => (
           <li key={c.slug}>
             <Link href={`/land-type/${c.slug}`} className="relative block aspect-[192/134] overflow-hidden rounded-2xl border border-line transition hover:-translate-y-0.5 hover:shadow-soft">
-              <Image src={c.image} alt={c.name} fill sizes="200px" className="object-cover" />
+              <Image src={c.image} alt="" fill sizes="200px" className="object-cover" />
               <span className="sr-only">{c.name}</span>
             </Link>
           </li>
@@ -375,7 +375,7 @@ export function FaqSection() {
           ))}
         </ul>
         <Link href="/about#verification" className="mt-3 inline-flex items-center gap-1 text-[12.5px] font-semibold text-sea hover:underline">
-          Learn more <ArrowRight className="h-3.5 w-3.5" />
+          How we verify listings <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </aside>
     </section>

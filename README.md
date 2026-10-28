@@ -12,19 +12,17 @@ npm run dev          # http://localhost:3000
 npm run build && npm start
 ```
 
-The database (`data/db.json`) and uploaded files (`data/uploads/`) are created automatically on first run with demo data.
-To reset everything to the demo data, stop the server and delete `data/db.json`.
+The database (`data/db.json`) and uploaded files (`data/uploads/`) are created automatically on first run.
+In development a new database is filled with **demo data** (sample lands, users, businesses and reviews). In production (`NODE_ENV=production`)
+a new database only gets the admin account and the service categories – set `SEED_DEMO_DATA=true` only for a demo site, never for the live site.
+To reset local data, stop the server and delete `data/db.json`.
 
 ## Logins
 
-| Role | Email | Password | Goes to |
-|---|---|---|---|
-| **Admin** | pushkargharate3011@gmail.com | pushkar3011 | `/admin` |
-| Farmer (demo) | rajesh.kumar@email.com | farmer123 | `/dashboard` (farmer) |
-| Investor (demo) | nilesh.kude@email.com | investor123 | `/dashboard` (investor) |
-
-The admin email/password come from `.env.local` (`ADMIN_EMAIL`, `ADMIN_PASSWORD`) and are applied when the database is first created.
-Anyone can sign up at `/signup` as a farmer or investor. Change the admin password from **My Profile → Change Password**.
+The admin account is created from `ADMIN_EMAIL` / `ADMIN_PASSWORD` when a database is first created (if `ADMIN_PASSWORD` is empty a random one is used).
+Demo farmer/investor accounts exist only in local demo data – see `src/lib/seed.ts`. **Never put real passwords in this file.**
+Anyone can sign up at `/signup` as a farmer or investor. Change a password from **My Profile → Change Password**;
+admins can issue a temporary password to a user from **Admin → Users → Reset** (there is no email/SMS reset).
 
 ## Pages
 
@@ -61,10 +59,11 @@ Vercel cannot save files, so connect its free storage (one time, ~2 minutes):
 1. Vercel dashboard → your project → **Storage** → **Create Database** → **Neon (Postgres)** → Connect to the project.
    This adds `DATABASE_URL` automatically. The tables and demo data (incl. the admin account) are created on first visit.
 2. **Storage** → **Create** → **Blob** → Connect to the project. This adds `BLOB_READ_WRITE_TOKEN` (needed for photo/document uploads).
-3. **Settings → Environment Variables**, add:
-   - `AUTH_SECRET` = any long random text (keeps logins secure)
+3. **Settings → Environment Variables**, add (see `.env.example` for the full list):
+   - `AUTH_SECRET` = random text, **at least 32 characters** (required – logins are refused in production without it)
    - `NEXT_PUBLIC_SITE_URL` = `https://your-domain` (optional, defaults to the Vercel domain)
-   - `ADMIN_EMAIL` / `ADMIN_PASSWORD` (optional, default pushkargharate3011@gmail.com / pushkar3011)
+   - `ADMIN_EMAIL` / `ADMIN_PASSWORD` (used only when the database is first created)
+   - `NEXT_PUBLIC_SUPPORT_PHONE`, `NEXT_PUBLIC_WHATSAPP_URL`, `NEXT_PUBLIC_SUPPORT_EMAIL`, `NEXT_PUBLIC_LEGAL_NAME`, `NEXT_PUBLIC_BUSINESS_ADDRESS` – your real business details (shown on the site and legal pages)
 4. **Deployments** → ⋯ → **Redeploy**.
 
 Without step 1 the site still opens, but changes are only kept temporarily.
@@ -79,7 +78,10 @@ Set `AUTH_SECRET` in production. `DATA_DIR` lets you point the data folder at a 
 
 ## Project structure
 ```
-src/app/(site)      public pages (header + footer)
+src/app/(site)      public pages (header + footer), incl. /blog, legal pages, /install
+src/app/admin/blog  blog CMS (admin only)
+public/sw.js        service worker (PWA, offline page)
+tests/              smoke tests (npm run test:smoke against a running server)
 src/app/(app)       dashboards (header only)
 src/app/admin       admin panel
 src/app/actions     server actions (auth, lands, admin)

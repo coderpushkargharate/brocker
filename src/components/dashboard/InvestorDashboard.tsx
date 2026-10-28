@@ -20,7 +20,7 @@ function RecoCard({ land, saved }: { land: Land; saved: boolean }) {
           <Img src={land.images[0] || FALLBACK_LAND_IMAGE} alt="" fill sizes="360px" className="object-cover" />
         </Link>
         {land.verified && (
-          <span className="chip absolute left-3 top-3 bg-[#16a34a] py-1 text-[12.5px] text-white">
+          <span className="chip absolute left-3 top-3 bg-[#15803d] py-1 text-[12.5px] text-white">
             <CheckCircle2 className="h-4 w-4" /> VERIFIED
           </span>
         )}

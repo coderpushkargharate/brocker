@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { Sprout } from "lucide-react";
 import { SearchBar } from "@/components/SearchBar";
 import { LandCard } from "@/components/LandCard";
 import { BuySellCards, ExploreLocations, FaqSection, HowItWorks, LandServices, LandTypes, ReadyBanner, SectionHead, SellBanner, WhyChoose } from "@/components/home/Sections";
-import { JsonLd } from "@/components/JsonLd";
 import { getCurrentUser } from "@/lib/auth";
 import { readDB } from "@/lib/db";
 import { districtCounts, matchScore, publicLands } from "@/lib/lands";
-import { FAQS } from "@/lib/faqs";
 import { site } from "@/lib/config";
 
 export const metadata: Metadata = {
@@ -29,30 +26,20 @@ export default async function HomePage() {
 
   return (
     <>
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: FAQS.slice(0, 5).map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
-        }}
-      />
-
       {/* Hero */}
       <section className="bg-[#fefefe]">
-        <div className="container-x relative pb-10 pt-10 lg:pb-12 lg:pt-[100px]">
-          <div className="relative z-10 max-w-[700px]">
-            <p className="inline-flex w-full max-w-[535px] items-center justify-center gap-2 rounded-md border border-lime bg-gradient-to-r from-white to-[#f2fbea] py-1.5 text-[15px] font-semibold text-[#088810] sm:text-[16.5px]">
-              <Sprout className="h-5 w-5" /> Trusted Agriculture Land Marketplace
-            </p>
-            <h1 className="mt-7 font-display text-[32px] font-bold leading-[1.22] tracking-[-0.01em] text-black sm:text-[40px] lg:text-[41px]">
-              Where Farmers Find the <span className="text-gradient-green">Right Value,</span>
-              <br className="hidden sm:block" /> Investors Build the <span className="text-gradient-green">Right Future.</span>
+        <div className="container-x pb-10 pt-6 sm:pt-8 lg:pb-12 lg:pt-14">
+          <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-center lg:gap-10">
+          <div className="relative z-10 order-2 lg:order-1">
+            <h1 className="font-display text-[30px] font-bold leading-[1.22] tracking-[-0.01em] text-black sm:text-[40px] lg:text-[36px] xl:text-[42px]">
+              Where Farmers Find the <span className="text-gradient-green">Right Value,</span>{" "}
+              Investors Build the <span className="text-gradient-green">Right Future.</span>
             </h1>
             <p className="mt-3 max-w-[570px] font-display text-[16px] leading-snug text-[#555] sm:text-[17px]">
               A trusted marketplace connecting agricultural landowners with genuine investors through secure, transparent, and profitable land deals
             </p>
-            <div className="mt-12 flex flex-col gap-4 sm:flex-row">
-              <Link href="/dashboard/listings/new" className="btn btn-primary h-[46px] w-full rounded-lg text-[16px] shadow-[0_6px_14px_rgba(22,114,8,0.25)] sm:w-[238px]">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-4 lg:mt-10">
+              <Link href="/dashboard/listings/new" prefetch={false} className="btn btn-primary h-[46px] w-full rounded-lg text-[16px] shadow-[0_6px_14px_rgba(22,114,8,0.25)] sm:w-[238px]">
                 Sell Your Land
               </Link>
               <Link href="/buy-land" className="btn h-[46px] w-full rounded-lg border border-[#d1d5db] bg-white text-[16px] text-ink shadow-[0_4px_10px_rgba(0,0,0,0.08)] hover:bg-[#fafafa] sm:w-[238px]">
@@ -60,18 +47,19 @@ export default async function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="relative mt-8 lg:absolute lg:right-0 lg:top-[52px] lg:mt-0 lg:w-[61%]">
+          <div className="relative order-1 -mx-2 sm:mx-0 lg:order-2">
             <Image
               src="/images/hero.png"
               alt="Farmer and investor shaking hands over verified premium agricultural land – 5000+ verified customers, ₹250Cr+ worth transactions"
               width={1600}
               height={913}
               priority
-              sizes="(max-width:1024px) 100vw, 780px"
+              sizes="(max-width:1024px) 100vw, 720px"
               className="h-auto w-full"
             />
           </div>
-          <SearchBar className="relative z-10 mt-8 lg:mt-[110px]" />
+          </div>
+          <SearchBar className="relative z-10 mt-8 lg:mt-12" />
         </div>
       </section>
 

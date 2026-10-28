@@ -106,10 +106,10 @@ export default async function FindServicesPage({ searchParams }: Props) {
           ))}
           <li>
             <Link href="/post-requirement" className="flex h-full flex-col justify-between rounded-2xl border border-[#cfe8d6] bg-mint-50 p-4 hover:shadow-soft">
-              <span className="flex gap-3">
+              <span className="flex min-w-0 gap-3">
                 <ClipboardList className="h-9 w-9 shrink-0 text-brand" />
                 <span>
-                  <b className="block text-[17px] leading-tight text-ink">Post Your Requirement</b>
+                  <b className="block text-[15px] leading-tight text-ink [overflow-wrap:anywhere] sm:text-[17px]">Post Your Requirement</b>
                   <span className="mt-1 block text-[13px] text-body">Get multiple quotes from verified providers</span>
                 </span>
               </span>

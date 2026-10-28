@@ -6,7 +6,7 @@ import { MongoClient, type AnyBulkWriteOperation } from "mongodb";
 // records keep their own string id as _id
 type Doc = { _id: string; [k: string]: unknown };
 import type { DB } from "./types";
-import { buildSeed } from "./seed";
+import { buildSeed, DEMO_DATA_ENABLED } from "./seed";
 import { normalizeLandType } from "./config";
 import { DEFAULT_SERVICE_SETTINGS, SERVICE_CATEGORIES, seedBusinesses, seedServiceReviews, seedWorkers } from "./services-seed";
 
@@ -97,7 +97,7 @@ async function pgMutate<T>(fn: (db: DB) => T): Promise<T> {
 // Each list in DB is its own collection; a "meta" document holds the counters and a version number
 // that goes up on every save, so concurrent saves can't overwrite each other.
 
-const LISTS = ["users", "lands", "interests", "notifications", "calls", "enquiries", "views", "serviceCategories", "businesses", "workers", "serviceLeads", "serviceReviews", "serviceSettings"] as const;
+const LISTS = ["users", "lands", "interests", "notifications", "calls", "enquiries", "views", "serviceCategories", "businesses", "workers", "serviceLeads", "serviceReviews", "serviceSettings", "posts", "blogCategories", "auditLog"] as const;
 type ListName = (typeof LISTS)[number];
 const META_ID = "state";
 
@@ -147,6 +147,7 @@ async function ensureMongo() {
     await db.collection("users").createIndex({ email: 1 });
     await db.collection("users").createIndex({ phone: 1 });
     await db.collection("lands").createIndex({ slug: 1 });
+    await db.collection("posts").createIndex({ slug: 1 });
     // inserting meta last marks the import as finished; a parallel first run just loses the race
     await meta.insertOne({ _id: META_ID, version: 1, counters: data.counters ?? { landCode: 9900 } }).catch((e) => {
       if (e?.code !== 11000) throw e;
@@ -272,12 +273,18 @@ function upgrade(db: DB) {
   db.serviceLeads ??= [];
   db.serviceReviews ??= [];
   db.serviceSettings ??= [];
+  db.posts ??= [];
+  db.blogCategories ??= [];
+  db.auditLog ??= [];
   // first run after the Business Services & Labour update: add the categories and demo profiles once
   if (!db.counters.servicesSeeded) {
     if (!db.serviceCategories.length) db.serviceCategories = structuredClone(SERVICE_CATEGORIES);
-    if (!db.businesses.length) db.businesses = seedBusinesses();
-    if (!db.workers.length) db.workers = seedWorkers();
-    if (!db.serviceReviews.length) db.serviceReviews = seedServiceReviews();
+    // sample profiles only outside production (see DEMO_DATA_ENABLED)
+    if (DEMO_DATA_ENABLED) {
+      if (!db.businesses.length) db.businesses = seedBusinesses();
+      if (!db.workers.length) db.workers = seedWorkers();
+      if (!db.serviceReviews.length) db.serviceReviews = seedServiceReviews();
+    }
     db.counters.servicesSeeded = true;
   }
   if (!db.serviceSettings.length) db.serviceSettings = [{ ...DEFAULT_SERVICE_SETTINGS }];

@@ -11,6 +11,7 @@ import { ratingFor } from "@/lib/services-seed";
 import { EXPERIENCE_OPTIONS, imageForService } from "@/lib/services-config";
 import type { Business, DB, LeadKind, Notification, Worker } from "@/lib/types";
 import type { FormState } from "./auth";
+import { isBot, rateLimit, TOO_MANY } from "@/lib/security";
 
 const now = () => new Date().toISOString();
 const str = (fd: FormData, k: string, max = 300) => String(fd.get(k) ?? "").trim().slice(0, max);
@@ -40,6 +41,7 @@ export async function saveBusinessAction(_: FormState, fd: FormData): Promise<Fo
   const isAdmin = user?.role === "admin";
   const editId = str(fd, "id");
   if (editId && !isAdmin) return { error: "Only admins can edit a business." };
+  if (!isAdmin && (isBot(fd) || !(await rateLimit("business", 5, 60 * 60)))) return { error: TOO_MANY };
 
   const db0 = await readDB();
   const existing = editId ? db0.businesses.find((b) => b.id === editId) : undefined;
@@ -179,6 +181,7 @@ export async function saveWorkerAction(_: FormState, fd: FormData): Promise<Form
   const isAdmin = user?.role === "admin";
   const editId = str(fd, "id");
   if (editId && !isAdmin) return { error: "Only admins can edit a worker profile." };
+  if (!isAdmin && (isBot(fd) || !(await rateLimit("worker", 5, 60 * 60)))) return { error: TOO_MANY };
 
   const db0 = await readDB();
   const existing = editId ? db0.workers.find((w) => w.id === editId) : undefined;
@@ -304,6 +307,9 @@ export async function serviceLeadAction(_: FormState, fd: FormData): Promise<For
   const phone = str(fd, "phone", 20);
   const targetType = str(fd, "targetType") === "worker" ? "worker" : str(fd, "targetType") === "business" ? "business" : undefined;
   const targetId = str(fd, "targetId") || undefined;
+  const okText = kind === "callback" ? "Call back requested! You will get a call shortly." : kind === "requirement" ? "Your requirement is posted. Verified providers and workers near you will contact you soon." : "Enquiry sent! The business will contact you soon.";
+  if (isBot(fd)) return { ok: okText };
+  if (!(await rateLimit("lead", 8, 10 * 60))) return { error: TOO_MANY };
   if (name.length < 2) return { error: "Please enter your name." };
   if (!validPhone(phone)) return { error: "Please enter a valid 10-digit mobile number." };
   if (kind === "requirement" && !str(fd, "categoryId")) return { error: "Please choose what you need." };
@@ -348,9 +354,7 @@ export async function serviceLeadAction(_: FormState, fd: FormData): Promise<For
     notifyAdmins(db, `New ${label} from ${name}${target ? ` for ${target.name}` : ""}.`, "/admin/service-leads");
   });
   revalidatePath("/admin", "layout");
-  if (kind === "callback") return { ok: "Call back requested! You will get a call shortly." };
-  if (kind === "requirement") return { ok: "Your requirement is posted. Verified providers and workers near you will contact you soon." };
-  return { ok: "Enquiry sent! The business will contact you soon." };
+  return { ok: okText };
 }
 
 export async function submitServiceReviewAction(_: FormState, fd: FormData): Promise<FormState> {
@@ -359,6 +363,8 @@ export async function submitServiceReviewAction(_: FormState, fd: FormData): Pro
   const name = str(fd, "name", 60);
   const rating = Math.round(num(fd, "rating"));
   const text = str(fd, "text", 800);
+  if (isBot(fd)) return { ok: "Thank you! Your review will appear after a quick check." };
+  if (!(await rateLimit("review", 5, 10 * 60))) return { error: TOO_MANY };
   if (name.length < 2) return { error: "Please enter your name." };
   if (rating < 1 || rating > 5) return { error: "Please choose a star rating." };
   if (text.length < 5) return { error: "Please write a few words about your experience." };
@@ -389,6 +395,7 @@ export async function toggleSaveServiceAction(id: string, next: string) {
 
 /** Count views, calls and WhatsApp taps. */
 export async function trackServiceAction(type: "business" | "worker", id: string, what: "view" | "call" | "whatsapp") {
+  if (!(await rateLimit("track", 60, 60))) return;
   await mutate((db) => {
     const t = type === "business" ? db.businesses.find((b) => b.id === id) : db.workers.find((w) => w.id === id);
     if (!t) return;

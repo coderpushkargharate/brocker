@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ExternalLink, Heart, Inbox, LayoutDashboard, LogOut, Map, Menu, Plus, Users, X, Store, HardHat, PhoneCall, Star, Tags, Settings } from "lucide-react";
+import { ExternalLink, Heart, Inbox, LayoutDashboard, LogOut, Map, Menu, Plus, Users, X, Store, HardHat, PhoneCall, Star, Tags, Settings, Newspaper, History } from "lucide-react";
 import { logoutAction } from "@/app/actions/auth";
 import { LogoMark } from "../Logo";
 
@@ -14,6 +14,11 @@ const LINKS = [
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/interests", label: "Investor Interests", icon: Heart },
   { href: "/admin/enquiries", label: "Enquiries", icon: Inbox },
+];
+
+const CONTENT_LINKS = [
+  { href: "/admin/blog", label: "Blog", icon: Newspaper },
+  { href: "/admin/audit-log", label: "Audit Log", icon: History },
 ];
 
 const SERVICE_LINKS = [
@@ -49,6 +54,17 @@ export function AdminNav({ name, counts }: { name: string; counts: Counts }) {
           </Link>
         );
       })}
+      <p className="mt-3 px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-white/45">Content</p>
+      {CONTENT_LINKS.map((l) => (
+        <Link
+          key={l.href}
+          href={l.href}
+          onClick={() => setOpen(false)}
+          className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14.5px] font-medium ${isOn(l) ? "bg-brand text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}`}
+        >
+          <l.icon className="h-[18px] w-[18px]" /> {l.label}
+        </Link>
+      ))}
       <p className="mt-3 px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-white/45">Services &amp; Labour</p>
       {SERVICE_LINKS.map((l) => {
         const badge = serviceBadge[l.href] ?? 0;
@@ -83,7 +99,7 @@ export function AdminNav({ name, counts }: { name: string; counts: Counts }) {
         <span className="flex items-center gap-2 font-semibold">
           <LogoMark size={30} /> AgriLand Admin
         </span>
-        <button onClick={() => setOpen((o) => !o)} aria-label="Menu">
+        <button type="button" onClick={() => setOpen((o) => !o)} aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} className="flex h-11 w-11 items-center justify-center">
           {open ? <X /> : <Menu />}
         </button>
       </div>
@@ -107,6 +123,7 @@ export function AdminNav({ name, counts }: { name: string; counts: Counts }) {
 export function ConfirmButton({ message, className, children }: { message: string; className?: string; children: React.ReactNode }) {
   return (
     <button
+      type="submit"
       className={className}
       onClick={(e) => {
         if (!confirm(message)) e.preventDefault();

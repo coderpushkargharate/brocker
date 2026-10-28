@@ -24,7 +24,7 @@ export default function SellLandPage() {
   return (
     <>
       <PageHero title="Sell Your Agricultural Land to Genuine Investors" sub="List your land free, get verified and connect directly with serious investors across India — no middlemen, full transparency." crumb={{ name: "Sell Land", href: "/sell-land" }}>
-        <Link href="/dashboard/listings/new" className="btn btn-primary h-12 px-8 text-[16px]">
+        <Link href="/dashboard/listings/new" prefetch={false} className="btn btn-primary h-12 px-8 text-[16px]">
           List Your Land Free
         </Link>
         <Link href="/contact?subject=Help%20selling%20my%20land" className="btn btn-ghost h-12 px-8 text-[16px]">

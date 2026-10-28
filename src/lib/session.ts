@@ -4,9 +4,14 @@ import type { Role } from "./types";
 export const SESSION_COOKIE = "agri_session";
 export const SESSION_DAYS = 7;
 
+export class MissingSecretError extends Error {}
+
 function secret() {
-  const s = process.env.AUTH_SECRET || "dev-only-insecure-secret-change-me-in-env-file-please";
-  return new TextEncoder().encode(s);
+  const s = process.env.AUTH_SECRET;
+  // In production a missing secret would let anyone who knows the fallback forge an admin session, so refuse to run.
+  if (!s && process.env.NODE_ENV === "production") throw new MissingSecretError("AUTH_SECRET is not set");
+  if (s && s.length < 32 && process.env.NODE_ENV === "production") throw new MissingSecretError("AUTH_SECRET must be at least 32 characters");
+  return new TextEncoder().encode(s || "dev-only-insecure-secret-change-me-in-env-file-please");
 }
 
 export interface SessionPayload {
@@ -30,7 +35,8 @@ export async function verifySession(token?: string): Promise<SessionPayload | nu
     const { payload } = await jwtVerify(token, secret());
     if (!payload.sub) return null;
     return { sub: payload.sub, role: payload.role as Role, name: String(payload.name || "") };
-  } catch {
+  } catch (e) {
+    if (e instanceof MissingSecretError) console.error("[auth]", e.message);
     return null;
   }
 }

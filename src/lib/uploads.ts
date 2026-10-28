@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import { put, head } from "@vercel/blob";
 import { UPLOAD_DIR } from "./db";
+import { matchesSignature } from "./security";
 
 const IMAGE_TYPES: Record<string, string> = { "image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "image/gif": ".gif" };
 const VIDEO_TYPES: Record<string, string> = { "video/mp4": ".mp4", "video/webm": ".webm", "video/quicktime": ".mov" };
@@ -33,6 +34,9 @@ async function store(file: File, kind: "image" | "video" | "doc") {
   if (!ext) throw new UploadError(`Unsupported file type for ${file.name}`);
   const max = kind === "video" ? 50 : 8;
   if (file.size > max * 1024 * 1024) throw new UploadError(`${file.name} is larger than ${max} MB`);
+  // the browser-reported type can be spoofed; check the file really starts like one
+  const head16 = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+  if (!matchesSignature(head16, file.type)) throw new UploadError(`${file.name} does not look like a valid ${ext.slice(1).toUpperCase()} file`);
   const name = crypto.randomUUID() + ext;
   const sub = kind === "doc" ? "docs" : "public";
 

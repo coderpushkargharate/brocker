@@ -4,6 +4,7 @@ import { useState, useTransition, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Bookmark, Check, Copy, Heart, Phone, Send, Share2 } from "lucide-react";
 import { expressInterestAction, logCallAction, recordShareAction, recordViewAction, toggleSaveAction } from "@/app/actions/lands";
+import { trackLead } from "./Consent";
 
 function useLoginRedirect() {
   const router = useRouter();
@@ -92,8 +93,10 @@ export function InterestButton({
     start(async () => {
       const r = await expressInterestAction(landId);
       if (r.needLogin) return toLogin();
-      if (r.ok) setSent(true);
-      else setMsg(r.message);
+      if (r.ok) {
+        setSent(true);
+        trackLead("land_interest");
+      } else setMsg(r.message);
     });
 
   if (variant === "list" && sent)

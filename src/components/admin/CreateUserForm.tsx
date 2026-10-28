@@ -1,5 +1,6 @@
 "use client";
 
+import { keepValues, useResetOnSuccess } from "@/lib/forms";
 import { useActionState } from "react";
 import { createUserAction } from "@/app/actions/admin";
 import { DISTRICTS } from "@/lib/config";
@@ -7,8 +8,9 @@ import { Alert } from "../auth/AuthForms";
 
 export function CreateUserForm() {
   const [state, action, pending] = useActionState(createUserAction, undefined);
+  const ref = useResetOnSuccess(state);
   return (
-    <form action={action} className="space-y-3">
+    <form ref={ref} onSubmit={keepValues(action)} className="space-y-3">
       <Alert error={state?.error} ok={state?.ok} />
       <input name="name" required placeholder="Full name" className="input" />
       <input name="email" type="email" required placeholder="Email" className="input" />

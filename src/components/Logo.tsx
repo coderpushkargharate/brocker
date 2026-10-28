@@ -17,7 +17,6 @@ export function Logo({ href = "/", dark = false }: { href?: string; dark?: boole
         <span className={`block text-[22px] font-bold tracking-tight ${dark ? "text-white" : "text-ink"}`}>
           Agri<span className={dark ? "text-[#7ed957]" : "text-ink"}>Land</span>
         </span>
-        {!dark && <span className="hidden text-[10.5px] font-medium uppercase tracking-wide whitespace-nowrap text-muted sm:block">Trusted Agriculture Land Marketplace</span>}
       </span>
     </Link>
   );

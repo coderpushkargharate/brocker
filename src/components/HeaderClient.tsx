@@ -8,6 +8,7 @@ import { Logo } from "./Logo";
 import { Avatar } from "./Avatar";
 import { logoutAction } from "@/app/actions/auth";
 import type { Role } from "@/lib/types";
+import { InstallButton } from "./Pwa";
 
 type NavItem = { href: string; label: string; short?: string; children?: { href: string; label: string; desc: string }[] };
 
@@ -69,13 +70,15 @@ export function HeaderClient({ user, unread }: { user: U; unread: number }) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur">
-      <div className="container-x flex h-[76px] items-center justify-between gap-4 lg:h-[88px]">
-        <Logo />
+      <div className="container-x flex h-[68px] items-center justify-between gap-4 sm:h-[76px] lg:h-[88px] lg:gap-6">
+        <div className="shrink-0">
+          <Logo />
+        </div>
 
-        <nav aria-label="Main" className="hidden h-full items-center gap-5 lg:flex xl:gap-7">
+        <nav aria-label="Main" className="hidden h-full min-w-0 flex-1 items-center justify-center gap-4 lg:flex xl:gap-6 2xl:gap-8">
           {NAV.map((n) => {
             const on = active === n.href;
-            const cls = `relative flex h-full items-center gap-1 whitespace-nowrap text-[15px] font-medium transition-colors xl:text-[15.5px] ${on ? "text-brand" : "text-[#374151] hover:text-brand"}`;
+            const cls = `relative flex h-full items-center gap-1 whitespace-nowrap text-[14.5px] font-medium transition-colors xl:text-[15.5px] ${on ? "text-brand" : "text-[#374151] hover:text-brand"}`;
             const label = n.short ? (
               <>
                 <span className="2xl:hidden">{n.short}</span>
@@ -117,11 +120,12 @@ export function HeaderClient({ user, unread }: { user: U; unread: number }) {
           })}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-3">
           {postHref && (
-            <Link href={postHref} className="btn hidden h-11 rounded-lg border-2 border-brand bg-white px-4 text-[14.5px] text-brand hover:bg-mint-50 sm:inline-flex">
-              <Plus className="h-4 w-4" /> Post Listing
-              <span className="rounded bg-brand px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-white">Free</span>
+            <Link href={postHref} prefetch={false} className="btn hidden h-11 rounded-lg border-2 border-brand bg-white px-3 text-[14.5px] text-brand hover:bg-mint-50 sm:inline-flex xl:px-4">
+              <Plus className="h-4 w-4" /> <span className="lg:hidden xl:inline">Post Listing</span>
+              <span className="hidden lg:inline xl:hidden">Post</span>
+              <span className="hidden rounded bg-brand px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-white 2xl:inline">Free</span>
             </Link>
           )}
           {user ? (
@@ -136,11 +140,11 @@ export function HeaderClient({ user, unread }: { user: U; unread: number }) {
               <div className="relative" ref={menuRef}>
                 <button onClick={() => setMenu((m) => !m)} className="flex items-center gap-3 rounded-full py-1 pr-1 text-left" aria-haspopup="menu" aria-expanded={menu}>
                   <Avatar src={user.avatar} name={user.name} size={42} />
-                  <span className="hidden leading-tight sm:block">
-                    <span className="block text-[15px] font-semibold text-ink">{user.name}</span>
+                  <span className="hidden max-w-[140px] leading-tight sm:block lg:hidden 2xl:block">
+                    <span className="block truncate text-[15px] font-semibold text-ink">{user.name}</span>
                     <span className="block text-[13px] text-muted">{roleLabel}</span>
                   </span>
-                  <ChevronDown className="hidden h-4 w-4 text-muted sm:block" />
+                  <ChevronDown className="hidden h-4 w-4 text-muted sm:block lg:hidden 2xl:block" />
                 </button>
                 {menu && (
                   <div role="menu" className="absolute right-0 top-[calc(100%+10px)] w-56 overflow-hidden rounded-xl border border-line bg-white py-2 shadow-soft">
@@ -180,8 +184,9 @@ export function HeaderClient({ user, unread }: { user: U; unread: number }) {
               </div>
             </>
           ) : (
-            <Link href="/login" className="btn btn-primary hidden h-11 rounded-lg px-6 text-[14.5px] shadow-[0_6px_14px_rgba(22,114,8,0.25)] sm:inline-flex">
-              <UserCircle2 className="h-5 w-5" /> Log in /Sign Up
+            <Link href="/login" className="btn btn-primary hidden h-11 rounded-lg px-4 text-[14.5px] shadow-[0_6px_14px_rgba(22,114,8,0.25)] sm:inline-flex xl:px-6">
+              <UserCircle2 className="h-5 w-5" /> <span className="lg:hidden 2xl:inline">Log in / Sign Up</span>
+              <span className="hidden lg:inline 2xl:hidden">Log in</span>
             </Link>
           )}
           <button className="flex h-10 w-10 items-center justify-center rounded-lg border border-line lg:hidden" onClick={() => setOpen((o) => !o)} aria-label="Open menu" aria-expanded={open}>
@@ -191,7 +196,7 @@ export function HeaderClient({ user, unread }: { user: U; unread: number }) {
       </div>
 
       {open && (
-        <nav aria-label="Mobile" className="border-t border-line bg-white lg:hidden">
+        <nav aria-label="Mobile" className="max-h-[calc(100dvh-68px)] overflow-y-auto border-t border-line bg-white pb-[env(safe-area-inset-bottom)] lg:hidden">
           <div className="container-x flex flex-col py-2">
             {NAV.map((n) => (
               <div key={n.href}>
@@ -215,15 +220,16 @@ export function HeaderClient({ user, unread }: { user: U; unread: number }) {
               </Link>
             )}
             {postHref && (
-              <Link href={postHref} className="btn mt-2 h-11 border-2 border-brand bg-white text-brand">
+              <Link href={postHref} prefetch={false} className="btn mt-2 h-11 border-2 border-brand bg-white text-brand">
                 <Plus className="h-4 w-4" /> Post Listing — Free
               </Link>
             )}
             {!user && (
               <Link href="/login" className="btn btn-primary mt-2 h-11">
-                <UserCircle2 className="h-5 w-5" /> Log in /Sign Up
+                <UserCircle2 className="h-5 w-5" /> Log in / Sign Up
               </Link>
             )}
+            <InstallButton className="btn btn-ghost mt-2 h-11" label="Install AgriLand App" />
           </div>
         </nav>
       )}

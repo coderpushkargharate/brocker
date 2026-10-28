@@ -1,9 +1,11 @@
 "use client";
 
+import { keepValues } from "@/lib/forms";
 import Link from "next/link";
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, BadgeCheck, Camera, Check, CircleCheck, FileUp, ImagePlus, Loader2, MapPin, Phone, Star, UserRound, UsersRound } from "lucide-react";
 import { saveWorkerAction } from "@/app/actions/services";
+import { Honeypot } from "@/components/FormGuard";
 import { Alert } from "@/components/auth/AuthForms";
 import { Img } from "@/components/Img";
 import { DISTRICTS, SUB_DISTRICTS } from "@/lib/config";
@@ -184,7 +186,8 @@ export function WorkerForm({ categories, mode = "public", initial, helpPhone, he
         </aside>
       )}
 
-      <form key={formKey} ref={formRef} action={action} onChange={() => setLive(readForm(formRef.current))} className="min-w-0 space-y-5">
+      <form key={formKey} ref={formRef} onSubmit={keepValues(action)} onChange={() => setLive(readForm(formRef.current))} className="relative min-w-0 space-y-5">
+        <Honeypot />
         {initial && <input type="hidden" name="id" value={initial.id} />}
         <div id="form-alert">
           <Alert error={state?.error} />

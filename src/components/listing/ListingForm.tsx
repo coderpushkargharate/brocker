@@ -1,5 +1,6 @@
 "use client";
 
+import { keepValues } from "@/lib/forms";
 import Link from "next/link";
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -204,7 +205,7 @@ export function ListingForm({ land, isAdmin, owners, backHref = "/dashboard" }: 
   };
 
   return (
-    <form action={action} className="container-dash pt-8">
+    <form onSubmit={keepValues(action)} className="container-dash pt-8">
       {land && <input type="hidden" name="id" value={land.id} />}
       {kept.map((src) => (
         <input key={src} type="hidden" name="existingImages" value={src} />

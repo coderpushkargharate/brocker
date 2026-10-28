@@ -6,6 +6,9 @@ import { mutate, newId, readDB } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import type { DocKey, Enquiry, LandStatus, Role } from "@/lib/types";
 import type { FormState } from "./auth";
+import { audit } from "@/lib/audit";
+
+const MIN_PASSWORD = 8;
 
 const now = () => new Date().toISOString();
 
@@ -14,10 +17,12 @@ async function admin() {
 }
 
 export async function setLandStatusAction(id: string, status: LandStatus) {
-  await admin();
+  const me = await admin();
+  if (!["active", "draft", "pending", "sold", "rejected"].includes(status)) return;
   await mutate((db) => {
     const l = db.lands.find((x) => x.id === id);
     if (!l) return;
+    audit(db, me, `land:${l.status}->${status}`, l.title);
     const wasLive = l.status === "active";
     l.status = status;
     l.updatedAt = now();
@@ -99,12 +104,13 @@ export async function deleteUserAction(id: string) {
     db.notifications = db.notifications.filter((n) => n.userId !== id);
     db.users = db.users.filter((x) => x.id !== id);
     for (const x of db.users) x.saved = x.saved.filter((s) => !landIds.includes(s));
+    audit(db, me, "delete-user", `${u.name} (${u.role})`);
   });
   revalidatePath("/", "layout");
 }
 
 export async function createUserAction(_: FormState, fd: FormData): Promise<FormState> {
-  await admin();
+  const me = await admin();
   const name = String(fd.get("name") || "").trim();
   const email = String(fd.get("email") || "").trim().toLowerCase();
   const phone = String(fd.get("phone") || "").trim();
@@ -112,7 +118,7 @@ export async function createUserAction(_: FormState, fd: FormData): Promise<Form
   const roleIn = String(fd.get("role") || "farmer");
   const role: Role = roleIn === "admin" ? "admin" : roleIn === "investor" ? "investor" : "farmer";
   if (name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "Please enter a valid name and email." };
-  if (password.length < 6) return { error: "Password must be at least 6 characters." };
+  if (password.length < MIN_PASSWORD) return { error: `Password must be at least ${MIN_PASSWORD} characters.` };
   if ((await readDB()).users.some((u) => u.email === email)) return { error: "A user with this email already exists." };
   const hash = await bcrypt.hash(password, 10);
   await mutate((db) => {
@@ -130,6 +136,7 @@ export async function createUserAction(_: FormState, fd: FormData): Promise<Form
       profileViews: 0,
       createdAt: now(),
     });
+    audit(db, me, `create-user:${role}`, email);
   });
   revalidatePath("/admin", "layout");
   return { ok: `User ${name} created.` };
@@ -158,10 +165,33 @@ export async function changePasswordAction(_: FormState, fd: FormData): Promise<
   const next = String(fd.get("password") || "");
   const u = (await readDB()).users.find((x) => x.id === me.id)!;
   if (!(await bcrypt.compare(current, u.passwordHash))) return { error: "Current password is incorrect." };
-  if (next.length < 6) return { error: "New password must be at least 6 characters." };
+  if (next.length < MIN_PASSWORD) return { error: `New password must be at least ${MIN_PASSWORD} characters.` };
   const hash = await bcrypt.hash(next, 10);
   await mutate((db) => {
     db.users.find((x) => x.id === me.id)!.passwordHash = hash;
   });
   return { ok: "Password changed." };
+}
+
+/**
+ * Account recovery: the site has no email/SMS provider, so a user who forgot their password asks support,
+ * and an admin issues a one-time temporary password after confirming the caller owns the registered number.
+ * Admin accounts can't be reset this way.
+ */
+export async function resetUserPasswordAction(id: string): Promise<{ password?: string; error?: string }> {
+  const me = await admin();
+  const target = (await readDB()).users.find((u) => u.id === id);
+  if (!target || target.role === "admin" || target.id === me.id) return { error: "This account can't be reset here." };
+  const alphabet = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = crypto.getRandomValues(new Uint8Array(12));
+  const password = Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
+  const hash = await bcrypt.hash(password, 10);
+  await mutate((db) => {
+    const u = db.users.find((x) => x.id === id);
+    if (!u) return;
+    u.passwordHash = hash;
+    db.notifications.push({ id: newId(), userId: u.id, kind: "system", text: "Your password was reset by AgriLand support. Please change it from My Profile.", link: "/dashboard/profile", read: false, createdAt: now() });
+    audit(db, me, "reset-password", `${u.name} (${u.role})`);
+  });
+  return { password };
 }
