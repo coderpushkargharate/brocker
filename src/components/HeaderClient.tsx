@@ -70,12 +70,10 @@ export function HeaderClient({ user, unread }: { user: U; unread: number }) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur">
-      <div className="container-x flex h-[68px] items-center justify-between gap-4 sm:h-[76px] lg:h-[88px] lg:gap-6">
-        <div className="shrink-0">
-          <Logo />
-        </div>
+      <div className="container-x flex h-[76px] items-center justify-between gap-4 lg:h-[88px]">
+        <Logo />
 
-        <nav aria-label="Main" className="hidden h-full min-w-0 flex-1 items-center justify-center gap-4 lg:flex xl:gap-6 2xl:gap-8">
+        <nav aria-label="Main" className="hidden h-full items-center gap-4 lg:flex xl:gap-6 2xl:gap-7">
           {NAV.map((n) => {
             const on = active === n.href;
             const cls = `relative flex h-full items-center gap-1 whitespace-nowrap text-[14.5px] font-medium transition-colors xl:text-[15.5px] ${on ? "text-brand" : "text-[#374151] hover:text-brand"}`;
@@ -120,7 +118,7 @@ export function HeaderClient({ user, unread }: { user: U; unread: number }) {
           })}
         </nav>
 
-        <div className="flex shrink-0 items-center gap-3">
+        <div className="flex items-center gap-3">
           {postHref && (
             <Link href={postHref} prefetch={false} className="btn hidden h-11 rounded-lg border-2 border-brand bg-white px-3 text-[14.5px] text-brand hover:bg-mint-50 sm:inline-flex xl:px-4">
               <Plus className="h-4 w-4" /> <span className="lg:hidden xl:inline">Post Listing</span>
@@ -196,7 +194,7 @@ export function HeaderClient({ user, unread }: { user: U; unread: number }) {
       </div>
 
       {open && (
-        <nav aria-label="Mobile" className="max-h-[calc(100dvh-68px)] overflow-y-auto border-t border-line bg-white pb-[env(safe-area-inset-bottom)] lg:hidden">
+        <nav aria-label="Mobile" className="max-h-[calc(100dvh-76px)] overflow-y-auto border-t border-line bg-white pb-[env(safe-area-inset-bottom)] lg:hidden">
           <div className="container-x flex flex-col py-2">
             {NAV.map((n) => (
               <div key={n.href}>

@@ -28,17 +28,16 @@ export default async function HomePage() {
     <>
       {/* Hero */}
       <section className="bg-[#fefefe]">
-        <div className="container-x pb-10 pt-6 sm:pt-8 lg:pb-12 lg:pt-14">
-          <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-center lg:gap-10">
-          <div className="relative z-10 order-2 lg:order-1">
-            <h1 className="font-display text-[30px] font-bold leading-[1.22] tracking-[-0.01em] text-black sm:text-[40px] lg:text-[36px] xl:text-[42px]">
-              Where Farmers Find the <span className="text-gradient-green">Right Value,</span>{" "}
-              Investors Build the <span className="text-gradient-green">Right Future.</span>
+        <div className="container-x relative flex flex-col pb-10 pt-6 sm:pt-8 lg:block lg:pb-12 lg:pt-[100px]">
+          <div className="relative z-10 max-w-[700px]">
+            <h1 className="font-display text-[30px] font-bold leading-[1.22] tracking-[-0.01em] text-black sm:text-[40px] lg:text-[41px]">
+              Where Farmers Find the <span className="text-gradient-green">Right Value,</span>
+              <br className="hidden sm:block" /> Investors Build the <span className="text-gradient-green">Right Future.</span>
             </h1>
             <p className="mt-3 max-w-[570px] font-display text-[16px] leading-snug text-[#555] sm:text-[17px]">
               A trusted marketplace connecting agricultural landowners with genuine investors through secure, transparent, and profitable land deals
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-4 lg:mt-10">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-4 lg:mt-12">
               <Link href="/dashboard/listings/new" prefetch={false} className="btn btn-primary h-[46px] w-full rounded-lg text-[16px] shadow-[0_6px_14px_rgba(22,114,8,0.25)] sm:w-[238px]">
                 Sell Your Land
               </Link>
@@ -47,19 +46,19 @@ export default async function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="relative order-1 -mx-2 sm:mx-0 lg:order-2">
+          {/* mobile/tablet: image above the text; desktop: original position on the right */}
+          <div className="relative order-first mb-6 lg:absolute lg:right-0 lg:top-[52px] lg:mb-0 lg:w-[61%]">
             <Image
               src="/images/hero.png"
               alt="Farmer and investor shaking hands over verified premium agricultural land – 5000+ verified customers, ₹250Cr+ worth transactions"
               width={1600}
               height={913}
               priority
-              sizes="(max-width:1024px) 100vw, 720px"
+              sizes="(max-width:1024px) 100vw, 780px"
               className="h-auto w-full"
             />
           </div>
-          </div>
-          <SearchBar className="relative z-10 mt-8 lg:mt-12" />
+          <SearchBar className="relative z-10 mt-8 lg:mt-[110px]" />
         </div>
       </section>
 
